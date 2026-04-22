@@ -1,13 +1,16 @@
-create table public.messages (
-  id           uuid primary key default gen_random_uuid(),
-  room_id      uuid not null references public.chat_rooms(id) on delete cascade,
-  sender_id    uuid not null references public.profiles(id) on delete cascade,
-  content      text not null,
-  seen_at      timestamptz,                  -- null = unseen (read receipts)
-  expires_at   timestamptz,                  -- null = never expires; set on insert for Snapchat-style expiry
-  deleted_at   timestamptz,                  -- soft delete; null = not deleted
-  created_at   timestamptz default now(),
-  updated_at   timestamptz default now()
+CREATE TYPE message_content_type AS ENUM ('string', 'url');
+
+CREATE TABLE public.messages (
+  id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  room_id    uuid        NOT NULL REFERENCES public.chat_rooms(id)  ON DELETE CASCADE,
+  sender_id  uuid        NOT NULL REFERENCES public.profiles(id)    ON DELETE CASCADE,
+  type       message_content_type    DEFAULT 'string',
+  content    text        NOT NULL,
+  seen_at    timestamptz,
+  expires_at timestamptz,
+  deleted_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
 -- Fast message fetching ordered by time for a given room

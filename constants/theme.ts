@@ -20,7 +20,7 @@ export const Colors = {
     supaPrimary: "#aeac3a"
   },
   dark: {
-    text: '#060606',
+    text: '#ffffff',
     background: '#000',
     tint: tintColorDark,
     icon: '#9BA1A6',

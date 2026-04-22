@@ -134,7 +134,6 @@ export default function PermissionsScreen({
           <View style={[styles.logoContainer, { borderColor: theme.supaPrimary }]}>
             <Ionicons name="camera" size={40} color={theme.supaPrimary} />
           </View>
-          <Text style={[styles.title, { color: theme.text }]}>Welcome to SupaChat</Text>
           <Text style={[styles.subtitle, { color: theme.icon }]}>
             Hi, {userEmail?.split("@")[0] || "there"}!
           </Text>
@@ -194,7 +193,7 @@ export default function PermissionsScreen({
             <ActivityIndicator color="#000" />
           ) : (
             <Text style={styles.continueButtonText}>
-              {allGranted ? "Start Snapping!" : "Grant Permissions"}
+              {allGranted ? "Start Snapping!" : "Grant All Permissions"}
             </Text>
           )}
         </TouchableOpacity>
