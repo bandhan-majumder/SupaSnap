@@ -64,7 +64,7 @@ export default function Auth() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: theme.background }]}
+      style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
@@ -73,14 +73,8 @@ export default function Auth() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.logoContainer}>
-          <View style={[styles.logoCircle, { borderColor: theme.supaPrimary }]}>
-            <Text style={[styles.logoText, { color: theme.supaPrimary }]}>SC</Text>
-          </View>
-        </View>
-
         <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.text }]}>SupaChat</Text>
+          <Text style={[styles.title, { color: '#ECEDEE' }]}>SupaChat</Text>
           <Text style={[styles.subtitle, { color: theme.icon }]}>
             {isLogin ? "Welcome back!" : "Create an account"}
           </Text>
@@ -88,12 +82,12 @@ export default function Auth() {
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: theme.icon }]}>Email</Text>
+            <Text style={[styles.inputLabel, { color: theme.label }]}>Email</Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  backgroundColor: isDark ? "#1a1a1a" : "#f0f0f0",
+                  backgroundColor: "#00000000",
                   color: theme.text,
                   borderColor: isDark ? "#333" : "#ddd",
                 },
@@ -110,12 +104,12 @@ export default function Auth() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: theme.icon }]}>Password</Text>
+            <Text style={[styles.inputLabel, { color: theme.label }]}>Password</Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  backgroundColor: isDark ? "#1a1a1a" : "#f0f0f0",
+                  backgroundColor: "#00000000",
                   color: theme.text,
                   borderColor: isDark ? "#333" : "#ddd",
                 },
@@ -198,9 +192,10 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   title: {
-    fontSize: 32,
+    fontSize: 42,
     fontWeight: "bold",
     marginBottom: 8,
+    marginTop: 40,
   },
   subtitle: {
     fontSize: 16,

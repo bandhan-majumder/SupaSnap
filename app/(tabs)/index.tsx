@@ -56,7 +56,6 @@ export default function HomeScreen() {
 
   function handleBarCodeScanned(scanningResult: BarcodeScanningResult) {
     if (scanningResult.data) {
-      console.log("scanning result data: ", scanningResult.data);
       setQrCodeDetected(scanningResult.data);
     }
     if (timeOutRef.current) {

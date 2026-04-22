@@ -179,7 +179,7 @@ export default function ChatListScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder="Search by email..."
+              placeholder="Search by username.."
               placeholderTextColor={theme.icon}
               value={searchEmail}
               onChangeText={setSearchEmail}

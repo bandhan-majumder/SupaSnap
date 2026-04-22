@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Alert,
   ActivityIndicator,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -21,12 +23,40 @@ import * as ImagePicker from 'expo-image-picker';
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { profile, loading, uploading, error, updateAvatar } = useProfile();
+  const { profile, loading, uploading, updating, error, updateProfile, updateAvatar } = useProfile();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
-  const displayName = profile?.display_name || user?.email?.split("@")[0] || "User";
-  const initials = displayName.slice(0, 2).toUpperCase();
+  const displayName = '@'+profile?.username || 'randomuse32';
+  const initials = displayName.slice(1, 2).toUpperCase();
+
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editUsername, setEditUsername] = useState("");
+  const [editFullName, setEditFullName] = useState("");
+
+  const openEditModal = () => {
+    setEditUsername(profile?.username || "");
+    setEditFullName(profile?.full_name || "");
+    setEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async () => {
+    const result = await updateProfile({
+      username: editUsername.trim() || undefined,
+      full_name: editFullName.trim() || undefined,
+    });
+
+    if (result.success) {
+      setEditModalVisible(false);
+      Alert.alert("Success", "Profile updated!");
+    } else {
+      Alert.alert("Error", result.error || "Failed to update profile");
+    }
+  };
+
+  const handleProfileInfo = () => {
+    openEditModal();
+  };
 
   React.useEffect(() => {
     if (error) {
@@ -118,14 +148,23 @@ export default function ProfileScreen() {
             </View>
           </TouchableOpacity>
           <Text style={[styles.displayName, { color: theme.text }]}>{displayName}</Text>
-          <Text style={[styles.email, { color: theme.icon }]}>{user?.email}</Text>
+          {profile?.full_name ? (
+            <Text style={[styles.email, { color: theme.icon }]}>@{profile.full_name}</Text>
+          ) : (
+            <TouchableOpacity onPress={handleProfileInfo}>
+              <Text style={[styles.email, { color: theme.tint }]}>Set up Full Name</Text>
+            </TouchableOpacity>
+          )}
           <Text style={[styles.tapHint, { color: theme.icon }]}>Tap camera icon to change photo</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Account</Text>
 
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}>
+          <TouchableOpacity
+            style={[styles.menuItem, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}
+            onPress={handleProfileInfo}
+          >
             <Ionicons name="person-outline" size={22} color={theme.text} />
             <View style={styles.menuItemContent}>
               <Text style={[styles.menuItemTitle, { color: theme.text }]}>Profile Info</Text>
@@ -183,6 +222,58 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Edit Profile</Text>
+
+            <Text style={[styles.inputLabel, { color: theme.text }]}>Username</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5", color: theme.text }]}
+              value={editUsername}
+              onChangeText={setEditUsername}
+              placeholder="Enter username"
+              placeholderTextColor={theme.icon}
+              autoCapitalize="none"
+            />
+
+            <Text style={[styles.inputLabel, { color: theme.text }]}>Full Name</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5", color: theme.text }]}
+              value={editFullName}
+              onChangeText={setEditFullName}
+              placeholder="Enter full name"
+              placeholderTextColor={theme.icon}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.text }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: theme.tint }]}
+                onPress={handleSaveProfile}
+                disabled={updating}
+              >
+                {updating ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <Text style={[styles.modalButtonText, { color: "#000" }]}>Save</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -293,5 +384,48 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#f44336",
     marginLeft: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 40,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  input: {
+    padding: 14,
+    borderRadius: 10,
+    fontSize: 16,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    marginTop: 24,
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

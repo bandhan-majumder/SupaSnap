@@ -7,7 +7,8 @@ import { decode } from "base64-arraybuffer";
 export interface Profile {
   id: string;
   email: string | null;
-  display_name: string | null;
+  username: string | null;
+  full_name: string | null;
   avatar_url: string | null;
   created_at: string;
   updated_at: string;
@@ -25,7 +26,6 @@ export function useProfile() {
 
     setLoading(true);
     try {
-      // console.log("Fetching profile for user:", user.id);
 
       const { data, error } = await supabase
         .from("profiles")
@@ -34,14 +34,13 @@ export function useProfile() {
         .single();
 
       if (error) {
-        // console.error("Fetch profile error:", error);
+        console.error("Fetch profile error:", error);
         setError(error.message);
       } else {
-        // console.log("Profile fetched:", data);
         setProfile(data);
       }
     } catch (e) {
-      // console.error("Fetch profile exception:", e);
+      console.error("Fetch profile exception:", e);
       setError((e as Error).message);
     } finally {
       setLoading(false);
@@ -51,6 +50,78 @@ export function useProfile() {
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  const [updating, setUpdating] = useState(false);
+
+  const checkUsernameAvailable = useCallback(
+    async (username: string, excludeUserId?: string): Promise<boolean> => {
+      if (!username) return false;
+
+      let query = supabase
+        .from("profiles")
+        .select("id")
+        .ilike("username", username);
+
+      if (excludeUserId) {
+        query = query.neq("id", excludeUserId);
+      }
+
+      const { data, error } = await query;
+      if (error) return false;
+      return !data || data.length === 0;
+    },
+    [],
+  );
+
+  const updateProfile = useCallback(
+    async (updates: {
+      username?: string;
+      full_name?: string;
+    }): Promise<{ success: boolean; error?: string }> => {
+      if (!user) {
+        return { success: false, error: "No user logged in" };
+      }
+
+      setUpdating(true);
+      setError(null);
+
+      try {
+        if (updates.username) {
+          const available = await checkUsernameAvailable(
+            updates.username,
+            user.id,
+          );
+          if (!available) {
+            setUpdating(false);
+            return { success: false, error: "Username already taken" };
+          }
+        }
+
+        const updateData: Partial<Profile> = {
+          ...updates,
+          updated_at: new Date().toISOString(),
+        };
+
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update(updateData)
+          .eq("id", user.id);
+
+        if (updateError) {
+          setUpdating(false);
+          return { success: false, error: updateError.message };
+        }
+
+        setProfile((prev) => (prev ? { ...prev, ...updates } : null));
+        setUpdating(false);
+        return { success: true };
+      } catch (e) {
+        setUpdating(false);
+        return { success: false, error: (e as Error).message };
+      }
+    },
+    [user, checkUsernameAvailable],
+  );
 
   const updateAvatar = async (fileUri: string): Promise<boolean> => {
     if (!user) {
@@ -80,12 +151,12 @@ export function useProfile() {
       }
 
       const { data: signedData, error } = await supabase.storage
-          .from("user_images")
-          .createSignedUrl(uploadData.path, 31536000);
+        .from("user_images")
+        .createSignedUrl(uploadData.path, 31536000);
 
-      if (error){
+      if (error) {
         return false;
-      };
+      }
 
       if (signedData?.signedUrl) {
         const { error: updateError } = await supabase
@@ -106,8 +177,8 @@ export function useProfile() {
           ...profile,
           id: user.id,
           email: user.email || null,
-          display_name:
-            profile?.display_name || user.email?.split("@")[0] || null,
+          username: profile?.username || null,
+          full_name: profile?.full_name || null,
           avatar_url: signedData.signedUrl,
           created_at: profile?.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -127,11 +198,42 @@ export function useProfile() {
     }
   };
 
+  const getProfile = useCallback(async (): Promise<{
+    data: Profile | null;
+    error: string | null;
+  }> => {
+    if (!user) return { data: null, error: "No user logged in" };
+
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        return { data: null, error: error.message };
+      }
+
+      setProfile(data);
+      return { data, error: null };
+    } catch (e) {
+      return { data: null, error: (e as Error).message };
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   return {
     profile,
     loading,
     uploading,
+    updating,
     error,
+    getProfile,
+    updateProfile,
     updateAvatar,
     refetch: fetchProfile,
   };

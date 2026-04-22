@@ -14,18 +14,20 @@ export const Colors = {
     background: '#fff',
     tint: tintColorLight,
     icon: '#687076',
+    label: '#000000',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
-    supaPrimary: "#FFFC00"
+    supaPrimary: "#aeac3a"
   },
   dark: {
-    text: '#ECEDEE',
+    text: '#060606',
     background: '#000',
     tint: tintColorDark,
     icon: '#9BA1A6',
+    label: '#000000',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
-    supaPrimary: "#FFFC00"
+    supaPrimary: "#cbc94f"
   },
 };
 
