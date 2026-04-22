@@ -43,3 +43,14 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
+
+README.md

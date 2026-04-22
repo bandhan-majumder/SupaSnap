@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -35,19 +36,20 @@ export default function ProfileScreen() {
 
   const handlePickImage = async () => {
     try {
-      const ImagePicker = require("expo-image-picker");
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission Required", "Please grant photo library access.");
         return;
       }
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
+      const options: ImagePicker.ImagePickerOptions = {
+        mediaTypes: ["images"], // if we further support videos as well, we might want to check type in the handler too
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
-      });
+      };
+
+      const result = await ImagePicker.launchImageLibraryAsync(options);
 
       if (!result.canceled && result.assets?.[0]?.uri) {
         const success = await updateAvatar(result.assets[0].uri);
