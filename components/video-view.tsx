@@ -1,10 +1,12 @@
 import { Image } from "expo-image";
-import React, { useEffect } from "react";
-import { Alert, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import IconButton from "./icon-button";
 import { saveToLibraryAsync } from "expo-media-library";
 import { shareAsync } from "expo-sharing";
 import { useVideoPlayer, VideoView } from "expo-video";
+import SendSheet, { SendSheetRef } from "./send-sheet";
+import { Ionicons } from "@expo/vector-icons";
 
 interface VideoViewComponentProps {
   video: string;
@@ -16,6 +18,7 @@ export default function VideoViewComponent({
 }: VideoViewComponentProps) {
   const videViewRef = React.useRef<VideoView>(null);
   const [isPlaying, setIsPlaying] = React.useState(true);
+  const sendSheetRef = useRef<SendSheetRef>(null);
   const [isMuted, setIsMuted] = React.useState<boolean>(false);
   const player = useVideoPlayer(video, (player) => {
     player.loop = true;
@@ -25,14 +28,13 @@ export default function VideoViewComponent({
 
   useEffect(() => {
     const subscription = player.addListener("playingChange", (isPlaying) => {
-        setIsPlaying(isPlaying.isPlaying);
-    })
+      setIsPlaying(isPlaying.isPlaying);
+    });
 
     return () => {
-        subscription.remove();
-    }
-
-  }, [player])
+      subscription.remove();
+    };
+  }, [player]);
   return (
     <View>
       <View
@@ -58,10 +60,10 @@ export default function VideoViewComponent({
           }}
         />
         <IconButton
-          iosName={isPlaying ? "play": "pause"}
-          androidName={isPlaying ? "play": "pause"}
+          iosName={isPlaying ? "play" : "pause"}
+          androidName={isPlaying ? "play" : "pause"}
           onPress={() => {
-            if(isPlaying)player.pause();
+            if (isPlaying) player.pause();
             else player.play();
             setIsPlaying(isPlaying);
           }}
@@ -79,13 +81,42 @@ export default function VideoViewComponent({
       <VideoView
         ref={videViewRef}
         allowsFullscreen
-        nativeControls
+        nativeControls={false}
         player={player}
         style={{
           width: "100%",
           height: "100%",
         }}
       />
+      <TouchableOpacity
+        style={styles.sendButton}
+        onPress={() => sendSheetRef.current?.open()}
+      >
+        <Ionicons name="send" size={20} color="#fff" />
+      </TouchableOpacity>
+
+      <SendSheet ref={sendSheetRef} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  sendButton: {
+    position: "absolute",
+    bottom: 40,
+    right: 20,
+
+    backgroundColor: "#1181a0",
+    padding: 14,
+    borderRadius: 30,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+  },
+});

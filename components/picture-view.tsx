@@ -13,29 +13,21 @@ import IconButton from "./icon-button";
 import { saveToLibraryAsync } from "expo-media-library";
 import { shareAsync } from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
-import AppBottomSheet, {
-  BottomSheetMethods,
-} from "@/components/bottom-sheet";
+import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
 import { ChatRoom, useConversations } from "@/hooks/useChats";
-import {
-  getAvatarUrl,
-  getDisplayName,
-  getInitials,
-} from "@/lib/utils";
+import { getAvatarUrl, getDisplayName, getInitials } from "@/lib/utils";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
+import SendSheet from "./send-sheet";
 
 interface PictureViewProps {
   picture: string;
   setPicture: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export default function PictureView({
-  picture,
-  setPicture,
-}: PictureViewProps) {
-   const { user } = useAuth();
-  const bottomSheetRef = useRef<BottomSheetMethods>(null);
+export default function PictureView({ picture, setPicture }: PictureViewProps) {
+  const { user } = useAuth();
+  const sendSheetRef = useRef<BottomSheetMethods>(null);
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
@@ -48,8 +40,8 @@ export default function PictureView({
   );
 
   const renderConversation = ({ item }: { item: ChatRoom }) => {
-    const displayName = getDisplayName(item, user?.id || '');
-    const avatarUrl = getAvatarUrl(item, user?.id || '');
+    const displayName = getDisplayName(item, user?.id || "");
+    const avatarUrl = getAvatarUrl(item, user?.id || "");
 
     return (
       <View
@@ -68,15 +60,8 @@ export default function PictureView({
             contentFit="cover"
           />
         ) : (
-          <View
-            style={[
-              styles.avatar,
-              { backgroundColor: theme.supaPrimary },
-            ]}
-          >
-            <Text style={styles.avatarText}>
-              {getInitials(displayName)}
-            </Text>
+          <View style={[styles.avatar, { backgroundColor: theme.supaPrimary }]}>
+            <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
           </View>
         )}
 
@@ -133,28 +118,12 @@ export default function PictureView({
 
       <TouchableOpacity
         style={styles.sendButton}
-        onPress={() => bottomSheetRef.current?.open()}
-        activeOpacity={0.8}
+        onPress={() => sendSheetRef.current?.open()}
       >
         <Ionicons name="send" size={20} color="#fff" />
       </TouchableOpacity>
 
-      <AppBottomSheet ref={bottomSheetRef} snapPoints={[250, 500]}>
-        <FlatList
-        ListHeaderComponent={<View>
-          <Text style={{
-            fontSize: 17,
-            color: Colors.dark.text,
-          }}>Send your snap to friends</Text>
-        </View>}
-          data={conversations}
-          renderItem={renderConversation}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={renderEmpty}
-          showsVerticalScrollIndicator={false}
-        />
-      </AppBottomSheet>
+      <SendSheet ref={sendSheetRef} />
     </View>
   );
 }
