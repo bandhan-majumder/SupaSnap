@@ -18,16 +18,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-const DEMO_USER_ID = "user1";
-
 export default function ChatRoomScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
   const { user } = useAuth();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
-  const currentUserId = user?.id || DEMO_USER_ID;
+  const currentUserId = user?.id;
 
   const { messages, loading, sendMessage } = useMessages(id || null);
   const [messageText, setMessageText] = useState("");
@@ -123,10 +120,9 @@ export default function ChatRoomScreen() {
   };
 
   const getOtherUserName = () => {
-    if (messages.length === 0) return "Chat";
     const other = messages.find((m) => m.sender_id !== currentUserId);
-    if (!other?.sender) return "Chat";
-    return other.sender.display_name || other.sender.email || "Chat";
+    if (!other?.sender?.username) return "";
+    return other.sender.username;
   };
 
   if (!id) {

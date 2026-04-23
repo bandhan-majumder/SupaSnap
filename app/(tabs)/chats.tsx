@@ -23,6 +23,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
 import UserPickerSheet from "@/components/user-picker-sheet";
+import { formatTime, getAvatarUrl, getDisplayName, getInitials } from "@/lib/utils";
 
 export default function ChatListScreen() {
   const router = useRouter();
@@ -72,33 +73,9 @@ export default function ChatListScreen() {
     setSearchResult(null);
   };
 
-  const getDisplayName = (conv: ChatRoom) => {
-    const other = conv.participants.find((p) => p.user?.id !== currentUserId);
-    return other?.user?.full_name || other?.user?.username || "Unknown";
-  };
-
-  const getAvatarUrl = (conv: ChatRoom): string | null => {
-    const other = conv.participants.find((p) => p.user?.id !== currentUserId);
-    return other?.user?.avatar_url ?? null;
-  };
-
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-
-  const formatTime = (dateStr: string) =>
-    new Date(dateStr).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
   const renderConversation = ({ item }: { item: ChatRoom }) => {
-    const displayName = getDisplayName(item);
-    const avatarUrl = getAvatarUrl(item);
+    const displayName = getDisplayName(item, user!.id);
+    const avatarUrl = getAvatarUrl(item, user!.id);
 
     return (
       <TouchableOpacity

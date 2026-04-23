@@ -301,14 +301,14 @@ export function useMessages(roomId: string | null) {
     };
   }, [roomId]);
 
-  const sendMessage = async (content: string): Promise<boolean> => {
+  const sendMessage = async (content: string, type: 'string' | 'url' = 'string'): Promise<boolean> => {
     if (!roomId || !content.trim() || !user) return false;
 
     try {
       const { error } = await supabase.from("messages").insert({
         room_id: roomId,
         sender_id: user.id,
-        type: "text",
+        type,
         content: content.trim(),
       });
 
