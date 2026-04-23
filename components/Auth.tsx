@@ -88,7 +88,7 @@ export default function Auth() {
                 styles.input,
                 {
                   backgroundColor: "#00000000",
-                  color: theme.text,
+                  color: '#000000',
                   borderColor: isDark ? "#333" : "#ddd",
                 },
               ]}
@@ -110,7 +110,7 @@ export default function Auth() {
                 styles.input,
                 {
                   backgroundColor: "#00000000",
-                  color: theme.text,
+                  color: '#000000',
                   borderColor: isDark ? "#333" : "#ddd",
                 },
               ]}

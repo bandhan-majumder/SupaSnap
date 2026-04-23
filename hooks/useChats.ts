@@ -5,111 +5,56 @@ import { RealtimeChannel } from "@supabase/supabase-js";
 
 export interface Message {
   id: string;
-  conversation_id: string;
+  room_id: string;
   sender_id: string;
+  type: string;
   content: string;
+  seen_at: string | null;
+  expires_at: string | null;
+  deleted_at: string | null;
   created_at: string;
+  updated_at: string;
   sender?: {
     id: string;
-    email: string;
-    display_name: string | null;
+    username: string;
+    full_name: string | null;
     avatar_url: string | null;
   };
 }
 
-export interface Conversation {
+export interface ChatRoom {
   id: string;
+  status: string;
   created_at: string;
   updated_at: string;
-  participants?: {
-    id: string;
-    email: string;
-    display_name: string | null;
-    avatar_url: string | null;
+
+  participants: {
+    user: {
+      id: string;
+      username: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    } | null;
   }[];
-  last_message?: Message;
+
+  last_message?: Message | null;
 }
 
 export interface Profile {
   id: string;
-  email: string | null;
-  display_name: string | null;
+  username: string;
+  full_name: string | null;
   avatar_url: string | null;
-  created_at: string;
   updated_at: string;
 }
 
-const DEMO_MESSAGES: Record<string, Message[]> = {
-  "conv1": [
-    { id: "m1", conversation_id: "conv1", sender_id: "user2", content: "Hey! Did you see the new snap?", created_at: new Date(Date.now() - 3600000).toISOString(), sender: { id: "user2", email: "alice@demo.com", display_name: "Alice", avatar_url: null } },
-    { id: "m2", conversation_id: "conv1", sender_id: "user1", content: "Yeah it was amazing! 🔥", created_at: new Date(Date.now() - 3000000).toISOString(), sender: { id: "user1", email: "me@demo.com", display_name: "Me", avatar_url: null } },
-    { id: "m3", conversation_id: "conv1", sender_id: "user2", content: "Let's go take some more pics tomorrow", created_at: new Date(Date.now() - 1800000).toISOString(), sender: { id: "user2", email: "alice@demo.com", display_name: "Alice", avatar_url: null } },
-  ],
-  "conv2": [
-    { id: "m4", conversation_id: "conv2", sender_id: "user3", content: "Check out this video I just recorded!", created_at: new Date(Date.now() - 86400000).toISOString(), sender: { id: "user3", email: "bob@demo.com", display_name: "Bob", avatar_url: null } },
-    { id: "m5", conversation_id: "conv2", sender_id: "user1", content: "Wow that's crazy! 😂", created_at: new Date(Date.now() - 82800000).toISOString(), sender: { id: "user1", email: "me@demo.com", display_name: "Me", avatar_url: null } },
-  ],
-  "conv3": [
-    { id: "m6", conversation_id: "conv3", sender_id: "user4", content: "Hey are you free this weekend?", created_at: new Date(Date.now() - 172800000).toISOString(), sender: { id: "user4", email: "carol@demo.com", display_name: "Carol", avatar_url: null } },
-  ],
-};
-
-const DEMO_CONVERSATIONS: Conversation[] = [
-  {
-    id: "conv1",
-    created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
-    updated_at: new Date(Date.now() - 1800000).toISOString(),
-    participants: [
-      { id: "user1", email: "me@demo.com", display_name: "Me", avatar_url: null },
-      { id: "user2", email: "alice@demo.com", display_name: "Alice", avatar_url: null },
-    ],
-    last_message: DEMO_MESSAGES["conv1"][DEMO_MESSAGES["conv1"].length - 1],
-  },
-  {
-    id: "conv2",
-    created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-    updated_at: new Date(Date.now() - 82800000).toISOString(),
-    participants: [
-      { id: "user1", email: "me@demo.com", display_name: "Me", avatar_url: null },
-      { id: "user3", email: "bob@demo.com", display_name: "Bob", avatar_url: null },
-    ],
-    last_message: DEMO_MESSAGES["conv2"][DEMO_MESSAGES["conv2"].length - 1],
-  },
-  {
-    id: "conv3",
-    created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
-    updated_at: new Date(Date.now() - 172800000).toISOString(),
-    participants: [
-      { id: "user1", email: "me@demo.com", display_name: "Me", avatar_url: null },
-      { id: "user4", email: "carol@demo.com", display_name: "Carol", avatar_url: null },
-    ],
-    last_message: DEMO_MESSAGES["conv3"][DEMO_MESSAGES["conv3"].length - 1],
-  },
-];
-
-const DEMO_PROFILES = [
-  { id: "user1", email: "me@demo.com", display_name: "Me", avatar_url: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "user2", email: "alice@demo.com", display_name: "Alice", avatar_url: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "user3", email: "bob@demo.com", display_name: "Bob", avatar_url: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "user4", email: "carol@demo.com", display_name: "Carol", avatar_url: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "user5", email: "david@demo.com", display_name: "David", avatar_url: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-];
-
-const USE_DEMO = true;
-const DEMO_USER_ID = "user1";
-
 export function useConversations() {
   const { user } = useAuth();
-  const [conversations, setConversations] = useState<Conversation[]>(USE_DEMO ? DEMO_CONVERSATIONS : []);
+  const [conversations, setConversations] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (USE_DEMO) {
-      setConversations(DEMO_CONVERSATIONS);
-      return;
-    }
-    
     if (!user) return;
     fetchConversations();
   }, [user]);
@@ -120,37 +65,44 @@ export function useConversations() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from("conversation_participants")
-        .select(`
-          conversation:conversations(
+        .from("chat_room_participants")
+        .select(
+          `
+          room:chat_rooms(
             id,
+            status,
             created_at,
             updated_at,
-            participants:conversation_participants(
-              user:profiles(id, email, display_name, avatar_url)
+            participants:chat_room_participants(
+              user:profiles(id, username, full_name, avatar_url)
             )
           )
-        `)
-        .eq("user_id", user.id);
+        `,
+        )
+        .eq("profile_id", user.id);
 
       if (error) throw error;
 
-      const convs = data?.map((d: any) => d.conversation).filter(Boolean) || [];
-      
-      for (const conv of convs) {
+      const rooms = data?.map((d: any) => d.room).filter(Boolean) || [];
+
+      for (const room of rooms) {
         const { data: lastMsg } = await supabase
           .from("messages")
-          .select("*, sender:profiles(id, email, display_name, avatar_url)")
-          .eq("conversation_id", conv.id)
+          .select("*, sender:profiles(id, username, full_name, avatar_url)")
+          .eq("room_id", room.id)
+          .is("deleted_at", null)
           .order("created_at", { ascending: false })
           .limit(1)
           .single();
-        conv.last_message = lastMsg;
+        room.last_message = lastMsg;
       }
 
-      setConversations(convs.sort((a, b) => 
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      ));
+      setConversations(
+        rooms.sort(
+          (a, b) =>
+            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+        ),
+      );
     } catch (e) {
       setError(e as Error);
     } finally {
@@ -158,80 +110,73 @@ export function useConversations() {
     }
   }, [user]);
 
-  const createConversation = async (participantIds: string[]): Promise<string | null> => {
-    if (USE_DEMO) {
-      const newId = `conv${Date.now()}`;
-      const newConv: Conversation = {
-        id: newId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        participants: [
-          { id: DEMO_USER_ID, email: "me@demo.com", display_name: "Me", avatar_url: null },
-          { id: participantIds[0], email: "new@demo.com", display_name: "New User", avatar_url: null },
-        ],
-      };
-      setConversations(prev => [newConv, ...prev]);
-      return newId;
-    }
-
+  const createConversation = async (
+    participantId: string,
+  ): Promise<string | null> => {
     if (!user) return null;
-
     try {
-      const { data: conv, error: convError } = await supabase
-        .from("conversations")
-        .insert({})
+      const { data: room, error: roomError } = await supabase
+        .from("chat_rooms")
+        .insert({ status: "active" })
         .select()
         .single();
 
-      if (convError || !conv) throw convError;
+      if (roomError || !room) throw roomError;
 
       const participants = [
-        { conversation_id: conv.id, user_id: user.id },
-        ...participantIds.map((id) => ({ conversation_id: conv.id, user_id: id })),
+        { room_id: room.id, profile_id: user.id },
+        { room_id: room.id, profile_id: participantId },
       ];
 
-      const { error: partError } = await supabase
-        .from("conversation_participants")
+      const { data: chatRoomData, error: partError } = await supabase
+        .from("chat_room_participants")
         .insert(participants);
 
       if (partError) throw partError;
 
       await fetchConversations();
-      return conv.id;
+      return room.id;
     } catch (e) {
       setError(e as Error);
       return null;
     }
   };
 
-  const findExistingConversation = async (otherUserId: string): Promise<string | null> => {
-    if (USE_DEMO) return null;
-
+  const findExistingConversation = async (
+    otherUserId: string,
+  ): Promise<string | null> => {
     if (!user) return null;
 
     const { data } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", user.id);
+      .from("chat_room_participants")
+      .select("room_id")
+      .eq("profile_id", user.id);
 
     if (!data || data.length === 0) return null;
 
-    const conversationIds = data.map((d) => d.conversation_id);
+    const roomIds = data.map((d) => d.room_id);
 
     const { data: existing } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", otherUserId)
-      .in("conversation_id", conversationIds)
+      .from("chat_room_participants")
+      .select("room_id")
+      .eq("profile_id", otherUserId)
+      .in("room_id", roomIds)
       .single();
 
-    return existing?.conversation_id || null;
+    return existing?.room_id || null;
   };
 
-  const startConversation = async (otherUserId: string): Promise<string | null> => {
-    const existing = await findExistingConversation(otherUserId);
-    if (existing) return existing;
-    return createConversation([otherUserId]);
+  const startConversation = async (
+    otherUserId: string,
+  ): Promise<string | null> => {
+    try {
+      const existing = await findExistingConversation(otherUserId);
+      if (existing) return existing;
+      return createConversation(otherUserId);
+    } catch (error) {
+      console.log("Error is: ", error);
+      return "";
+    }
   };
 
   return {
@@ -245,15 +190,11 @@ export function useConversations() {
 }
 
 export function useProfiles() {
-  const [profiles, setProfiles] = useState<typeof DEMO_PROFILES>(USE_DEMO ? DEMO_PROFILES : []);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (USE_DEMO) {
-      setProfiles(DEMO_PROFILES.filter(p => p.id !== DEMO_USER_ID));
-      return;
-    }
     fetchProfiles();
   }, []);
 
@@ -262,8 +203,8 @@ export function useProfiles() {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("id, username, full_name, avatar_url, updated_at")
+        .order("full_name", { ascending: true });
 
       if (error) throw error;
       setProfiles(data || []);
@@ -274,16 +215,13 @@ export function useProfiles() {
     }
   }, []);
 
-  const searchByEmail = async (email: string) => {
-    if (USE_DEMO) {
-      const found = DEMO_PROFILES.find(p => p.email.toLowerCase() === email.toLowerCase() && p.id !== DEMO_USER_ID);
-      return found || null;
-    }
-
+  const searchByUsername = async (
+    username: string,
+  ): Promise<Profile | null> => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
-      .eq("email", email.toLowerCase())
+      .select("id, username, full_name, avatar_url, updated_at")
+      .eq("username", username.toLowerCase())
       .single();
 
     if (error || !data) return null;
@@ -291,35 +229,31 @@ export function useProfiles() {
   };
 
   return {
-    profiles: profiles.filter((p) => p.id !== (USE_DEMO ? DEMO_USER_ID : undefined)),
+    profiles,
     allProfiles: profiles,
     loading,
     error,
     refetch: fetchProfiles,
-    searchByEmail,
-    getOtherParticipants: async () => [],
+    searchByUsername,
   };
 }
 
-export function useMessages(conversationId: string | null) {
+export function useMessages(roomId: string | null) {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchMessages = useCallback(async () => {
-    if (!conversationId) return;
-
-    if (USE_DEMO) {
-      setMessages(DEMO_MESSAGES[conversationId] || []);
-      return;
-    }
+    if (!roomId) return;
 
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from("messages")
-        .select("*, sender:profiles(id, email, display_name, avatar_url)")
-        .eq("conversation_id", conversationId)
+        .select("*, sender:profiles(id, username, full_name, avatar_url)")
+        .eq("room_id", roomId)
+        .is("deleted_at", null)
         .order("created_at", { ascending: true });
 
       if (error) throw error;
@@ -329,79 +263,61 @@ export function useMessages(conversationId: string | null) {
     } finally {
       setLoading(false);
     }
-  }, [conversationId]);
+  }, [roomId]);
 
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
 
   useEffect(() => {
-    if (USE_DEMO || !conversationId) return;
+    if (!roomId) return;
 
     const channel: RealtimeChannel = supabase
-      .channel(`messages:${conversationId}`)
+      .channel(`messages:${roomId}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "messages",
-          filter: `conversation_id=eq.${conversationId}`,
+          filter: `room_id=eq.${roomId}`,
         },
         async (payload) => {
           const { data: newMsg } = await supabase
             .from("messages")
-            .select("*, sender:profiles(id, email, display_name, avatar_url)")
+            .select("*, sender:profiles(id, username, full_name, avatar_url)")
             .eq("id", payload.new.id)
             .single();
 
           if (newMsg) {
             setMessages((prev) => [...prev, newMsg]);
           }
-        }
+        },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId]);
+  }, [roomId]);
 
   const sendMessage = async (content: string): Promise<boolean> => {
-    if (!conversationId || !content.trim()) return false;
-
-    if (USE_DEMO) {
-      const newMsg: Message = {
-        id: `msg${Date.now()}`,
-        conversation_id: conversationId,
-        sender_id: DEMO_USER_ID,
-        content: content.trim(),
-        created_at: new Date().toISOString(),
-        sender: { id: DEMO_USER_ID, email: "me@demo.com", display_name: "Me", avatar_url: null },
-      };
-      setMessages(prev => [...prev, newMsg]);
-      
-      if (DEMO_MESSAGES[conversationId]) {
-        DEMO_MESSAGES[conversationId].push(newMsg);
-      } else {
-        DEMO_MESSAGES[conversationId] = [newMsg];
-      }
-      return true;
-    }
+    if (!roomId || !content.trim() || !user) return false;
 
     try {
       const { error } = await supabase.from("messages").insert({
-        conversation_id: conversationId,
-        sender_id: DEMO_USER_ID,
+        room_id: roomId,
+        sender_id: user.id,
+        type: "text",
         content: content.trim(),
       });
 
       if (error) throw error;
 
       await supabase
-        .from("conversations")
+        .from("chat_rooms")
         .update({ updated_at: new Date().toISOString() })
-        .eq("id", conversationId);
+        .eq("id", roomId);
 
       return true;
     } catch (e) {
