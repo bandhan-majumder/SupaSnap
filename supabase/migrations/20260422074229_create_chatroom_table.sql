@@ -1,6 +1,3 @@
--- ─────────────────────────────────────────
--- CHAT ROOMS (1:1 only)
--- ─────────────────────────────────────────
 create table public.chat_rooms (
   id         uuid        primary key default gen_random_uuid(),
   status     text        not null default 'active'
@@ -9,9 +6,6 @@ create table public.chat_rooms (
   updated_at timestamptz default now()
 );
 
--- ─────────────────────────────────────────
--- PARTICIPANTS (exactly 2 per room)
--- ─────────────────────────────────────────
 create table public.chat_room_participants (
   room_id    uuid        not null references public.chat_rooms(id) on delete cascade,
   profile_id uuid        not null references public.profiles(id)   on delete cascade,
@@ -25,9 +19,6 @@ create trigger update_chat_rooms_updated_at
   before update on public.chat_rooms
   for each row execute procedure public.update_updated_at_column();
 
--- ─────────────────────────────────────────
--- FIX: Security-definer helper (breaks recursion)
--- ─────────────────────────────────────────
 create or replace function public.is_room_participant(p_room_id uuid)
 returns boolean
 language sql
@@ -43,9 +34,6 @@ as $$
   );
 $$;
 
--- ─────────────────────────────────────────
--- RLS — chat_rooms
--- ─────────────────────────────────────────
 alter table public.chat_rooms enable row level security;
 
 create policy "Participants can view their chat rooms."
@@ -60,9 +48,6 @@ create policy "Participants can update their chat rooms."
   on public.chat_rooms for update
   using (public.is_room_participant(id));
 
--- ─────────────────────────────────────────
--- RLS — chat_room_participants
--- ─────────────────────────────────────────
 alter table public.chat_room_participants enable row level security;
 
 create policy "Participants can view room members."

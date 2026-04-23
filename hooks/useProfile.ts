@@ -1,8 +1,7 @@
 import { supabase } from "@/lib/supabase";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
-import { useEffect, useState, useCallback } from "react";
-import * as FileSystem from "expo-file-system/legacy";
-import { decode } from "base64-arraybuffer";
+import { useUpload } from "./useUpload";
 
 export interface Profile {
   id: string;
@@ -20,13 +19,13 @@ export function useProfile() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { uploadMediaAndReturnSignedUrl } = useUpload();
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
     try {
-
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -133,62 +132,40 @@ export function useProfile() {
     setError(null);
 
     try {
-      const base64 = await FileSystem.readAsStringAsync(fileUri, {
-        encoding: "base64",
-      });
-      const filePath = `${user!.id}/${new Date().getTime()}.${"png"}`;
-      // img.type === 'image' ? 'png' : 'mp4'
-      // const contentType = img.type === 'image' ? 'image/png' : 'video/mp4';
-      const contentType = "image/png";
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("user_images")
-        .upload(filePath, decode(base64), { contentType });
+      const signedUrl = await uploadMediaAndReturnSignedUrl({ fileUri });
 
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        setError(uploadError.message);
+      if (!signedUrl) {
+        setError("Upload error");
         return false;
       }
 
-      const { data: signedData, error } = await supabase.storage
-        .from("user_images")
-        .createSignedUrl(uploadData.path, 31536000);
-
-      if (error) {
-        return false;
-      }
-
-      if (signedData?.signedUrl) {
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({
-            avatar_url: signedData.signedUrl,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", user.id);
-
-        if (updateError) {
-          console.error("Update profile error:", updateError);
-          setError(updateError.message);
-          return false;
-        }
-
-        const updatedProfile: Profile = {
-          ...profile,
-          id: user.id,
-          email: user.email || null,
-          username: profile?.username || null,
-          full_name: profile?.full_name || null,
-          avatar_url: signedData.signedUrl,
-          created_at: profile?.created_at || new Date().toISOString(),
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          avatar_url: signedUrl,
           updated_at: new Date().toISOString(),
-        };
+        })
+        .eq("id", user.id);
 
-        setProfile(updatedProfile as Profile);
-        return true;
+      if (updateError) {
+        console.error("Update profile error:", updateError);
+        setError(updateError.message);
+        return false;
       }
 
-      return false;
+      const updatedProfile: Profile = {
+        ...profile,
+        id: user.id,
+        email: user.email || null,
+        username: profile?.username || null,
+        full_name: profile?.full_name || null,
+        avatar_url: signedUrl,
+        created_at: profile?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      setProfile(updatedProfile as Profile);
+      return true;
     } catch (e) {
       console.error("Update avatar exception:", e);
       setError((e as Error).message || "Unknown error");

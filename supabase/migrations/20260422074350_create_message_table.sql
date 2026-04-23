@@ -1,14 +1,13 @@
--- ─────────────────────────────────────────
--- TYPE must come before the table
--- ─────────────────────────────────────────
-create type public.message_content_type as enum ('string', 'url');
+create type public.message_content_type as enum ('text', 'media');
+create type public.media_type as enum ('video', 'image');
 
 create table public.messages (
   id         uuid                     primary key default gen_random_uuid(),
   room_id    uuid                     not null references public.chat_rooms(id)  on delete cascade,
   sender_id  uuid                     not null references public.profiles(id)    on delete cascade,
-  type       public.message_content_type          default 'string',   -- ← schema-qualified
+  type       public.message_content_type          default 'text',   -- ← schema-qualified
   content    text                     not null,
+  media_type public.media_type                ,
   seen_at    timestamptz,
   expires_at timestamptz,
   deleted_at timestamptz,
@@ -25,9 +24,7 @@ create trigger update_messages_updated_at
 
 alter table public.messages enable row level security;
 
--- ─────────────────────────────────────────
--- RLS — messages (uses is_room_participant to avoid recursion)
--- ─────────────────────────────────────────
+
 create policy "Room participants can view messages."
   on public.messages for select
   using (

@@ -149,7 +149,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
           <Text style={[styles.displayName, { color: theme.text }]}>{displayName}</Text>
           {profile?.full_name ? (
-            <Text style={[styles.email, { color: theme.icon }]}>@{profile.full_name}</Text>
+            <Text style={[styles.email, { color: theme.icon }]}>{profile.full_name}</Text>
           ) : (
             <TouchableOpacity onPress={handleProfileInfo}>
               <Text style={[styles.email, { color: theme.tint }]}>Set up Full Name</Text>

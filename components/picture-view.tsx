@@ -14,11 +14,8 @@ import { saveToLibraryAsync } from "expo-media-library";
 import { shareAsync } from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
-import { ChatRoom, useConversations } from "@/hooks/useChats";
-import { getAvatarUrl, getDisplayName, getInitials } from "@/lib/utils";
-import { Colors } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
-import SendSheet from "./send-sheet";
+import SendSheet, { SendSheetRef } from "./send-sheet";
 
 interface PictureViewProps {
   picture: string;
@@ -26,61 +23,18 @@ interface PictureViewProps {
 }
 
 export default function PictureView({ picture, setPicture }: PictureViewProps) {
+  console.log("picture is: ", picture);
   const { user } = useAuth();
-  const sendSheetRef = useRef<BottomSheetMethods>(null);
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
+  const sendSheetRef = useRef<SendSheetRef>(null);
 
-  const { conversations } = useConversations();
+  if(!user?.id){
+    return;
+  }
 
-  const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>No conversations yet</Text>
-    </View>
-  );
-
-  const renderConversation = ({ item }: { item: ChatRoom }) => {
-    const displayName = getDisplayName(item, user?.id || "");
-    const avatarUrl = getAvatarUrl(item, user?.id || "");
-
-    return (
-      <View
-        style={[
-          styles.conversationRow,
-          {
-            backgroundColor: theme.surface,
-            borderColor: theme.border,
-          },
-        ]}
-      >
-        {avatarUrl ? (
-          <Image
-            source={{ uri: avatarUrl }}
-            style={styles.avatarImage}
-            contentFit="cover"
-          />
-        ) : (
-          <View style={[styles.avatar, { backgroundColor: theme.supaPrimary }]}>
-            <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
-          </View>
-        )}
-
-        <Text
-          style={[styles.nameText, { color: theme.text }]}
-          numberOfLines={1}
-        >
-          {displayName}
-        </Text>
-
-        <TouchableOpacity
-          style={styles.rowSendButton}
-          onPress={() => {}}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="send" size={18} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    );
+  const handleSendPress = () => {
+    if (user?.id) {
+      sendSheetRef.current?.open(picture, false, user.id);
+    }
   };
 
   return (
@@ -118,7 +72,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
 
       <TouchableOpacity
         style={styles.sendButton}
-        onPress={() => sendSheetRef.current?.open()}
+        onPress={handleSendPress}
       >
         <Ionicons name="send" size={20} color="#fff" />
       </TouchableOpacity>

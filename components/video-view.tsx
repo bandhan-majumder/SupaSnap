@@ -7,6 +7,7 @@ import { shareAsync } from "expo-sharing";
 import { useVideoPlayer, VideoView } from "expo-video";
 import SendSheet, { SendSheetRef } from "./send-sheet";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/hooks/useAuth";
 
 interface VideoViewComponentProps {
   video: string;
@@ -16,10 +17,18 @@ export default function VideoViewComponent({
   video,
   setVideo,
 }: VideoViewComponentProps) {
+  const { user } = useAuth();
   const videViewRef = React.useRef<VideoView>(null);
   const [isPlaying, setIsPlaying] = React.useState(true);
   const sendSheetRef = useRef<SendSheetRef>(null);
   const [isMuted, setIsMuted] = React.useState<boolean>(false);
+
+  const handleSendPress = () => {
+    if (user?.id) {
+      sendSheetRef.current?.open(video, true, user.id);
+    }
+  };
+
   const player = useVideoPlayer(video, (player) => {
     player.loop = true;
     player.muted = true;
@@ -90,7 +99,7 @@ export default function VideoViewComponent({
       />
       <TouchableOpacity
         style={styles.sendButton}
-        onPress={() => sendSheetRef.current?.open()}
+        onPress={handleSendPress}
       >
         <Ionicons name="send" size={20} color="#fff" />
       </TouchableOpacity>
