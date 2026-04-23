@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { Asset, getAlbumsAsync, getAssetsAsync } from "expo-media-library";
 import React, { useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 
 export default function MediaLibrary() {
   const [assets, setAssets] = useState<Asset[]>([]);

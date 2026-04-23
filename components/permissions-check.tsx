@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -92,6 +92,12 @@ export default function PermissionsScreen({
     cameraPermissions?.granted &&
     microphonePermissions?.granted &&
     mediaPermissions?.granted;
+
+  useEffect(() => {
+    if (allGranted) {
+      onComplete();
+    }
+  }, [])
 
   async function requestAllPermissions() {
     const camera = await requestCameraPermission();

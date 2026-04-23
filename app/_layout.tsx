@@ -31,7 +31,6 @@ export default function RootLayout() {
               presentation: "fullScreenModal",
               headerShown: false,
             }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
             <Stack.Screen name="media-library" options={{ presentation: 'modal' }} />
           </Stack>
 
