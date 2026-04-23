@@ -74,7 +74,7 @@ export default function Auth() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={[styles.title, { color: '#ECEDEE' }]}>SupaChat</Text>
+          <Text style={[styles.title, { color: '#ECEDEE' }]}>SupaSnap</Text>
           <Text style={[styles.subtitle, { color: theme.icon }]}>
             {isLogin ? "Welcome back!" : "Create an account"}
           </Text>

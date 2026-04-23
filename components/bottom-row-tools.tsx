@@ -20,7 +20,7 @@ export default function ButtonRowTools({ setCameraMode, cameraMode }: BottomRowT
             <ThemedText onPress={() => setCameraMode("picture")} style={{
                 fontWeight: cameraMode === "picture" ? "bold" : "100"
             }}>
-                Supachat
+                SupaSnap
             </ThemedText>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setCameraMode("video")}>

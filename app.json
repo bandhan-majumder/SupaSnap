@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "supachat",
-    "slug": "supachat",
+    "name": "supasnap",
+    "slug": "supasnap",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "supachat",
+    "scheme": "supasnap",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.supachat"
+      "bundleIdentifier": "com.anonymous.supasnap"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +28,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.anonymous.supachat"
+      "package": "com.anonymous.supasnap"
     },
     "web": {
       "output": "static",
