@@ -25,7 +25,7 @@ export default function VideoViewComponent({
 
   const handleSendPress = () => {
     if (user?.id) {
-      sendSheetRef.current?.open(video, true, user.id);
+      sendSheetRef.current?.open(video, true, user.id, 'video');
     }
   };
 

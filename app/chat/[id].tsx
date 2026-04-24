@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,106 +9,136 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
 } from "react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { useVideoPlayer, VideoView } from "expo-video";
+
 import { useMessages, Message } from "@/hooks/useChats";
 import { useAuth } from "@/hooks/useAuth";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import MediaViewer from "@/components/chat-media-viewer";
 
-export default function ChatRoomScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { user } = useAuth();
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
+const MEDIA_SIZE = Dimensions.get("window").width * 0.6;
 
-  const currentUserId = user?.id;
+const ImageMessage = React.memo(
+  ({ uri, onPress }: { uri: string; onPress: () => void }) => (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
+      <Image
+        source={{ uri }}
+        style={styles.mediaThumbnail}
+        contentFit="cover"
+      />
+    </TouchableOpacity>
+  ),
+);
 
-  const { messages, loading, sendMessage } = useMessages(id || null);
-  const [messageText, setMessageText] = useState("");
-  const [sending, setSending] = useState(false);
-  const flatListRef = useRef<FlatList>(null);
+const VideoMessage = React.memo(
+  ({ uri, onPress }: { uri: string; onPress: () => void }) => {
+    const player = useVideoPlayer(uri, (p) => {
+      p.muted = true;
+      p.loop = false;
+    });
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-    }
-  }, [messages.length]);
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.9}
+        style={styles.videoWrapper}
+      >
+        <VideoView
+          player={player}
+          style={styles.mediaThumbnail}
+          allowsFullscreen={false}
+          nativeControls={false}
+        />
+        <View style={styles.playOverlay}>
+          <View style={styles.playButton}>
+            <Ionicons name="play" size={28} color="#fff" />
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  },
+);
 
-  const handleSend = async () => {
-    if (!messageText.trim() || sending) return;
-
-    setSending(true);
-    const success = await sendMessage(messageText);
-    if (success) {
-      setMessageText("");
-    }
-    setSending(false);
-  };
-
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === now.toDateString()) {
-      return "Today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday";
-    }
-    return date.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
-  };
-
-  const shouldShowDate = (index: number) => {
-    if (index === 0) return true;
-    const currentDate = new Date(messages[index].created_at).toDateString();
-    const prevDate = new Date(messages[index - 1].created_at).toDateString();
-    return currentDate !== prevDate;
-  };
-
-  const renderMessage = ({ item, index }: { item: Message; index: number }) => {
-    const isOwn = item.sender_id === currentUserId;
+const MessageItem = React.memo(
+  ({
+    item,
+    isOwn,
+    showDate,
+    formatDate,
+    formatTime,
+    theme,
+    colorScheme,
+    onMediaPress,
+  }: any) => {
+    const isMedia = item.type === "media";
+    const isImage = isMedia && item.media_type === "image";
+    const isVideo = isMedia && item.media_type === "video";
 
     return (
       <>
-        {shouldShowDate(index) && (
+        {showDate && (
           <View style={styles.dateContainer}>
             <Text style={[styles.dateText, { color: theme.icon }]}>
               {formatDate(item.created_at)}
             </Text>
           </View>
         )}
-        <View style={[styles.messageContainer, isOwn && styles.ownMessageContainer]}>
+
+        <View
+          style={[styles.messageContainer, isOwn && styles.ownMessageContainer]}
+        >
           <View
             style={[
               styles.messageBubble,
               isOwn
-                ? { backgroundColor: theme.supaPrimary, borderBottomRightRadius: 4 }
-                : { backgroundColor: colorScheme === "dark" ? "#2a2a2a" : "#e5e5e5", borderBottomLeftRadius: 4 },
+                ? {
+                    backgroundColor: theme.supaPrimary,
+                    borderBottomRightRadius: 4,
+                  }
+                : {
+                    backgroundColor:
+                      colorScheme === "dark" ? "#2a2a2a" : "#e5e5e5",
+                    borderBottomLeftRadius: 4,
+                  },
+              isMedia && styles.mediaBubble,
             ]}
           >
-            <Text
-              style={[
-                styles.messageText,
-                { color: isOwn ? "#000" : theme.text },
-              ]}
-            >
-              {item.content}
-            </Text>
+            {isImage && (
+              <ImageMessage
+                uri={item.content}
+                onPress={() => onMediaPress(item.content, "image")}
+              />
+            )}
+            {isVideo && (
+              <VideoMessage
+                uri={item.content}
+                onPress={() => onMediaPress(item.content, "video")}
+              />
+            )}
+
+            {!isMedia && (
+              <Text
+                style={[
+                  styles.messageText,
+                  { color: isOwn ? "#000" : theme.text },
+                ]}
+              >
+                {item.content}
+              </Text>
+            )}
+
             <Text
               style={[
                 styles.timeText,
                 { color: isOwn ? "rgba(0,0,0,0.5)" : theme.icon },
+                isMedia && styles.mediaTimeText,
               ]}
             >
               {formatTime(item.created_at)}
@@ -117,12 +147,94 @@ export default function ChatRoomScreen() {
         </View>
       </>
     );
+  },
+);
+
+export default function ChatRoomScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
+
+  const currentUserId = user?.id;
+  const { messages, loading, sendMessage } = useMessages(id || null);
+
+  const [messageText, setMessageText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [viewerUri, setViewerUri] = useState("");
+  const [viewerType, setViewerType] = useState<"image" | "video">("image");
+
+  const flatListRef = useRef<FlatList>(null);
+
+  const handleMediaPress = useCallback(
+    (uri: string, type: "image" | "video") => {
+      setViewerUri(uri);
+      setViewerType(type);
+      setViewerVisible(true);
+    },
+    [],
+  );
+
+  const handleSend = async () => {
+    if (!messageText.trim() || sending) return;
+    setSending(true);
+    const success = await sendMessage(messageText);
+    if (success) setMessageText("");
+    setSending(false);
   };
 
+  const formatTime = (dateStr: string) =>
+    new Date(dateStr).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+
+    if (date.toDateString() === now.toDateString()) return "Today";
+    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return date.toLocaleDateString([], {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const shouldShowDate = (index: number) => {
+    if (index === 0) return true;
+    const current = new Date(messages[index].created_at).toDateString();
+    const prev = new Date(messages[index - 1].created_at).toDateString();
+    return current !== prev;
+  };
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: Message; index: number }) => (
+      <MessageItem
+        item={item}
+        isOwn={item.sender_id === currentUserId}
+        showDate={shouldShowDate(index)}
+        formatDate={formatDate}
+        formatTime={formatTime}
+        theme={theme}
+        colorScheme={colorScheme}
+        onMediaPress={handleMediaPress}
+      />
+    ),
+    [messages, currentUserId, theme, colorScheme, handleMediaPress],
+  );
+
   const getOtherUserName = () => {
-    const other = messages.find((m) => m.sender_id !== currentUserId);
-    if (!other?.sender?.username) return "";
-    return other.sender.username;
+    for (const m of messages) {
+      if (m.sender_id !== currentUserId && m.sender?.username) {
+        return m.sender.username;
+      }
+    }
+    return "";
   };
 
   if (!id) {
@@ -143,11 +255,21 @@ export default function ChatRoomScreen() {
           headerShadowVisible: false,
         }}
       />
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={["bottom"]}>
+      <View
+        style={{
+          height: 1,
+          backgroundColor: "#878484",
+          width: "100%",
+          marginVertical: 10,
+        }}
+      />
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+        edges={["bottom"]}
+      >
         <KeyboardAvoidingView
-          style={styles.flex}
+          style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
         >
           {loading ? (
             <View style={styles.loadingContainer}>
@@ -157,28 +279,44 @@ export default function ChatRoomScreen() {
             <FlatList
               ref={flatListRef}
               data={messages}
-              renderItem={renderMessage}
+              showsHorizontalScrollIndicator={false}
+              renderItem={renderItem}
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.messagesList}
-              onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+              initialNumToRender={10}
+              maxToRenderPerBatch={10}
+              windowSize={5}
+              removeClippedSubviews
+              onContentSizeChange={() =>
+                flatListRef.current?.scrollToEnd({ animated: true })
+              }
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Ionicons name="chatbubbles-outline" size={64} color={theme.icon} />
-                  <Text style={[styles.emptyText, { color: theme.icon }]}>No messages yet</Text>
-                  <Text style={[styles.emptySubtext, { color: theme.icon }]}>
-                    Send a message to start the conversation
+                  <Ionicons
+                    name="chatbubbles-outline"
+                    size={64}
+                    color={theme.icon}
+                  />
+                  <Text style={[styles.emptyText, { color: theme.icon }]}>
+                    No messages yet
                   </Text>
                 </View>
               }
             />
           )}
 
-          <View style={[styles.inputContainer, { backgroundColor: theme.background }]}>
+          <View
+            style={[
+              styles.inputContainer,
+              { backgroundColor: theme.background },
+            ]}
+          >
             <TextInput
               style={[
                 styles.input,
                 {
-                  backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f0f0f0",
+                  backgroundColor:
+                    colorScheme === "dark" ? "#1a1a1a" : "#f0f0f0",
                   color: theme.text,
                 },
               ]}
@@ -187,10 +325,13 @@ export default function ChatRoomScreen() {
               value={messageText}
               onChangeText={setMessageText}
               multiline
-              maxLength={1000}
             />
+
             <TouchableOpacity
-              style={[styles.sendButton, { backgroundColor: theme.supaPrimary }]}
+              style={[
+                styles.sendButton,
+                { backgroundColor: theme.supaPrimary },
+              ]}
               onPress={handleSend}
               disabled={!messageText.trim() || sending}
             >
@@ -203,78 +344,75 @@ export default function ChatRoomScreen() {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      <MediaViewer
+        visible={viewerVisible}
+        uri={viewerUri}
+        mediaType={viewerType}
+        onClose={() => setViewerVisible(false)}
+      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1 },
+
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  messagesList: { padding: 16, flexGrow: 1 },
+
+  emptyContainer: { alignItems: "center", marginTop: 100 },
+
+  emptyText: { fontSize: 18, marginTop: 16 },
+
+  dateContainer: { alignItems: "center", marginVertical: 16 },
+
+  dateText: { fontSize: 12 },
+
+  messageContainer: { marginVertical: 4, alignItems: "flex-start" },
+
+  ownMessageContainer: { alignItems: "flex-end" },
+
+  messageBubble: { maxWidth: "80%", padding: 12, borderRadius: 16 },
+  mediaBubble: { padding: 4 },
+
+  messageText: { fontSize: 16 },
+
+  mediaThumbnail: {
+    width: MEDIA_SIZE,
+    height: MEDIA_SIZE,
+    borderRadius: 12,
   },
-  flex: {
-    flex: 1,
+
+  videoWrapper: {
+    width: MEDIA_SIZE,
+    height: MEDIA_SIZE,
   },
-  loadingContainer: {
-    flex: 1,
+
+  playOverlay: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 12,
   },
-  messagesList: {
-    padding: 16,
-    flexGrow: 1,
-  },
-  emptyContainer: {
-    flex: 1,
+
+  playButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    alignItems: "center",
     justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 100,
+    paddingLeft: 4,
   },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: "center",
-    paddingHorizontal: 40,
-  },
-  dateContainer: {
-    alignItems: "center",
-    marginVertical: 16,
-  },
-  dateText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  messageContainer: {
-    marginVertical: 4,
-    alignItems: "flex-start",
-  },
-  ownMessageContainer: {
-    alignItems: "flex-end",
-  },
-  messageBubble: {
-    maxWidth: "80%",
-    padding: 12,
-    borderRadius: 16,
-  },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  timeText: {
-    fontSize: 10,
-    marginTop: 4,
-    alignSelf: "flex-end",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    padding: 12,
-    paddingBottom: 8,
-  },
+
+  timeText: { fontSize: 10, marginTop: 4, alignSelf: "flex-end" },
+
+  mediaTimeText: { marginTop: 6, marginRight: 4, marginBottom: 2 },
+
+  inputContainer: { flexDirection: "row", alignItems: "flex-end", padding: 12 },
+
   input: {
     flex: 1,
     borderRadius: 20,
@@ -283,6 +421,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     maxHeight: 100,
   },
+
   sendButton: {
     width: 44,
     height: 44,

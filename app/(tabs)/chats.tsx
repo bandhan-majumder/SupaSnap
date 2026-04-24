@@ -23,7 +23,12 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
 import UserPickerSheet from "@/components/user-picker-sheet";
-import { formatTime, getAvatarUrl, getDisplayName, getInitials } from "@/lib/utils";
+import {
+  formatTime,
+  getAvatarUrl,
+  getDisplayName,
+  getInitials,
+} from "@/lib/utils";
 
 export default function ChatListScreen() {
   const router = useRouter();
@@ -82,8 +87,8 @@ export default function ChatListScreen() {
         style={[
           styles.conversationItem,
           {
-            backgroundColor: theme.surface,
-            borderColor: theme.border,
+            // backgroundColor: theme.surface,
+            // borderColor: theme.border,
           },
         ]}
         activeOpacity={0.7}
@@ -122,10 +127,19 @@ export default function ChatListScreen() {
               numberOfLines={1}
             >
               {item.last_message.sender_id === currentUserId ? "You: " : ""}
-              {item.last_message.content}
+              {item.last_message.type !== "text"
+                ? item.last_message.media_type === "image"
+                  ? "image"
+                  : "video"
+                : item.last_message.content}
             </Text>
           ) : (
-            <Text style={[styles.lastMessage, { color: theme.secondaryText }]}>
+            <Text
+              style={[
+                styles.lastMessage,
+                { color: theme.secondaryText, fontStyle: "italic" },
+              ]}
+            >
               No messages yet
             </Text>
           )}
@@ -136,8 +150,14 @@ export default function ChatListScreen() {
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="chatbubbles-outline" size={56} color={theme.secondaryText} />
-      <Text style={[styles.emptyTitle, { color: theme.text }]}>No chats yet</Text>
+      <Ionicons
+        name="chatbubbles-outline"
+        size={56}
+        color={theme.secondaryText}
+      />
+      <Text style={[styles.emptyTitle, { color: theme.text }]}>
+        No chats yet
+      </Text>
       <Text style={[styles.emptySubtitle, { color: theme.secondaryText }]}>
         Tap the icon above to start a conversation
       </Text>
@@ -151,7 +171,10 @@ export default function ChatListScreen() {
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>Chats</Text>
         <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          style={[
+            styles.addButton,
+            { backgroundColor: theme.surface, borderColor: theme.border },
+          ]}
           onPress={() => bottomSheetRef.current?.open()}
         >
           <Ionicons name="person-add" size={20} color={theme.tint} />

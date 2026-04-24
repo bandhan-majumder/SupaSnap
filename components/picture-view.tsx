@@ -33,7 +33,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
 
   const handleSendPress = () => {
     if (user?.id) {
-      sendSheetRef.current?.open(picture, false, user.id);
+      sendSheetRef.current?.open(picture, false, user.id, 'image');
     }
   };
 

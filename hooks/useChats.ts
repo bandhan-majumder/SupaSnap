@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "./useAuth";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { RealtimeChannel } from "@supabase/supabase-js";
 
 export interface Message {
@@ -9,6 +9,7 @@ export interface Message {
   sender_id: string;
   type: string;
   content: string;
+  media_type?: "video" | "image";
   seen_at: string | null;
   expires_at: string | null;
   deleted_at: string | null;
@@ -85,17 +86,19 @@ export function useConversations() {
 
       const rooms = data?.map((d: any) => d.room).filter(Boolean) || [];
 
-      for (const room of rooms) {
-        const { data: lastMsg } = await supabase
-          .from("messages")
-          .select("*, sender:profiles(id, username, full_name, avatar_url)")
-          .eq("room_id", room.id)
-          .is("deleted_at", null)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-        room.last_message = lastMsg;
-      }
+      await Promise.all(
+        rooms.map(async (room) => {
+          const { data: lastMsg } = await supabase
+            .from("messages")
+            .select("*, sender:profiles(id, username, full_name, avatar_url)")
+            .eq("room_id", room.id)
+            .is("deleted_at", null)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
+          room.last_message = lastMsg;
+        }),
+      );
 
       setConversations(
         rooms.sort(
@@ -147,23 +150,25 @@ export function useConversations() {
   ): Promise<string | null> => {
     if (!user) return null;
 
-    const { data } = await supabase
+    const { data: myRooms } = await supabase
       .from("chat_room_participants")
       .select("room_id")
       .eq("profile_id", user.id);
 
-    if (!data || data.length === 0) return null;
+    if (!myRooms?.length) return null;
 
-    const roomIds = data.map((d) => d.room_id);
-
-    const { data: existing } = await supabase
+    const { data } = await supabase
       .from("chat_room_participants")
       .select("room_id")
       .eq("profile_id", otherUserId)
-      .in("room_id", roomIds)
-      .single();
+      .in(
+        "room_id",
+        myRooms.map((r) => r.room_id),
+      )
+      .limit(1)
+      .maybeSingle();
 
-    return existing?.room_id || null;
+    return data?.room_id ?? null;
   };
 
   const startConversation = async (
@@ -243,6 +248,7 @@ export function useMessages(roomId: string | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   const fetchMessages = useCallback(async () => {
     if (!roomId) return;
@@ -272,59 +278,110 @@ export function useMessages(roomId: string | null) {
   useEffect(() => {
     if (!roomId) return;
 
-    const channel: RealtimeChannel = supabase
-      .channel(`messages:${roomId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `room_id=eq.${roomId}`,
-        },
-        async (payload) => {
-          const { data: newMsg } = await supabase
-            .from("messages")
-            .select("*, sender:profiles(id, username, full_name, avatar_url)")
-            .eq("id", payload.new.id)
-            .single();
+    // Using a unique channel name to avoid reusing a live channel
+    const channelName = `messages:${roomId}:${Date.now()}`;
 
-          if (newMsg) {
-            setMessages((prev) => [...prev, newMsg]);
-          }
-        },
-      )
-      .subscribe();
+    const channel = supabase.channel(channelName);
+
+    channel.on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `room_id=eq.${roomId}`,
+      },
+      async (payload) => {
+        const { data: newMsg } = await supabase
+          .from("messages")
+          .select("*, sender:profiles(id, username, full_name, avatar_url)")
+          .eq("id", payload.new.id)
+          .single();
+
+        if (newMsg) {
+          setMessages((prev) => {
+            // Remove optimistic version if it exists, then add real one
+            const withoutOptimistic = prev.filter(
+              (m) =>
+                !m.id.startsWith("optimistic-") || m.content !== newMsg.content,
+            );
+            if (withoutOptimistic.some((m) => m.id === newMsg.id))
+              return withoutOptimistic;
+            return [...withoutOptimistic, newMsg];
+          });
+        }
+      },
+    );
+
+    channel.subscribe();
+    channelRef.current = channel;
 
     return () => {
-      supabase.removeChannel(channel);
+      const ch = channelRef.current;
+      if (ch) {
+        supabase.removeChannel(ch);
+        channelRef.current = null;
+      }
     };
   }, [roomId]);
 
-  const sendMessage = async (content: string, type: 'string' | 'url' = 'string'): Promise<boolean> => {
-    if (!roomId || !content.trim() || !user) return false;
+  const sendMessage = useCallback(
+    async (
+      content: string,
+      type: "text" | "media" = "text",
+      mediaType?: "video" | "image",
+    ): Promise<boolean> => {
+      if (!roomId || !content.trim() || !user) return false;
 
-    try {
-      const { error } = await supabase.from("messages").insert({
+      const optimisticMsg: Message = {
+        id: `optimistic-${Date.now()}`,
         room_id: roomId,
         sender_id: user.id,
         type,
+        media_type: mediaType,
         content: content.trim(),
-      });
+        seen_at: null,
+        expires_at: null,
+        deleted_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        sender: {
+          id: user.id,
+          username: user.user_metadata?.username ?? "",
+          full_name: user.user_metadata?.full_name ?? null,
+          avatar_url: user.user_metadata?.avatar_url ?? null,
+        },
+      };
 
-      if (error) throw error;
+      setMessages((prev) => [...prev, optimisticMsg]);
 
-      await supabase
-        .from("chat_rooms")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("id", roomId);
+      try {
+        const { error } = await supabase.from("messages").insert({
+          room_id: roomId,
+          sender_id: user.id,
+          type,
+          media_type: mediaType,
+          content: content.trim(),
+        });
 
-      return true;
-    } catch (e) {
-      setError(e as Error);
-      return false;
-    }
-  };
+        if (error) {
+          setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+          throw error;
+        }
+
+        await supabase
+          .from("chat_rooms")
+          .update({ updated_at: new Date().toISOString() })
+          .eq("id", roomId);
+
+        return true;
+      } catch (e) {
+        setError(e as Error);
+        return false;
+      }
+    },
+    [roomId, user],
+  );
 
   return {
     messages,

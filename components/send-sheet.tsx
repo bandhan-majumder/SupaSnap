@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   useColorScheme,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
 import { ChatRoom, useConversations, useMessages } from "@/hooks/useChats";
@@ -17,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useUpload } from "@/hooks/useUpload";
 
 export interface SendSheetRef {
-  open: (fileUri: string, isVideo: boolean, userId: string) => void;
+  open: (fileUri: string, isVideo: boolean, userId: string, mediaType: 'video' | 'image' | undefined) => void;
 }
 
 const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
@@ -26,41 +27,48 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
   const { conversations } = useConversations();
   const { uploadMediaAndReturnSignedUrl } = useUpload();
 
-  const [fileUri, setFileUri] = React.useState<string | null>(null);
-  const [isVideo, setIsVideo] = React.useState(false);
-
-  const [userId, setUserId] = React.useState<string | null>(null);
+  const [fileUri, setFileUri] = useState<string | null>(null);
+  const [isVideo, setIsVideo] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<'video'|'image'>();
 
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
   React.useImperativeHandle(ref, () => ({
-    open: (uri: string, video: boolean, uid: string) => {
+    open: (uri: string, video: boolean, uid: string, mediaType: 'video' | 'image' | undefined) => {
       setFileUri(uri);
       setUserId(uid);
       setIsVideo(video);
+      setMediaType(mediaType);
       bottomSheetRef.current?.open();
     },
   }));
 
-  const handleSend = async (fileUriToSend: string, conversationId: string, sendMessageFn: (url: string, type: "string" | "url") => Promise<boolean>) => {
+  const handleSend = async (fileUriToSend: string, conversationId: string, sendMessageFn: (url: string, type: 'text' | 'media', mediaType: 'video' | 'image' | undefined) => Promise<boolean>) => {
+    setSendingId(conversationId);
+    
     const signedUrl = await uploadMediaAndReturnSignedUrl({
       isVideo,
       fileUri: fileUriToSend,
     });
 
     if (!signedUrl) {
+      setSendingId(null);
       Alert.alert("Failed to send");
       return;
     }
 
-    const message = await sendMessageFn(signedUrl, "url");
+    const message = await sendMessageFn(signedUrl, "media", mediaType);
 
     if (!message) {
+      setSendingId(null);
       Alert.alert("Failed to send message");
       return;
     }
 
+    setSendingId(null);
     bottomSheetRef.current?.close();
     Alert.alert("Sent!");
   };
@@ -72,18 +80,20 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
       isVideo={isVideo}
       fileUri={fileUri}
       theme={theme}
+      sendingId={sendingId}
       onSend={handleSend}
     />
   );
 
-  const ConversationRow = React.memo(
-  ({ item, userId, isVideo, fileUri, theme, onSend }: {
+const ConversationRow = React.memo(
+  ({ item, userId, isVideo, fileUri, theme, sendingId, onSend }: {
     item: ChatRoom;
     userId: string;
     isVideo: boolean;
     fileUri: string | null;
     theme: typeof Colors.light;
-    onSend: (fileUri: string, conversationId: string, sendMessageFn: (url: string, type: "string" | "url") => Promise<boolean>) => void;
+    sendingId: string | null;
+    onSend: (fileUri: string, conversationId: string, sendMessageFn: (url: string, type: "text" | "media", mediaType: 'image' | 'video' | undefined) => Promise<boolean>) => void;
   }) => {
     const displayName = getDisplayName(item, userId);
     const avatarUrl = getAvatarUrl(item, userId);
@@ -93,6 +103,8 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
       if (!fileUri) return;
       onSend(fileUri, item.id, sendMessage);
     };
+
+    const isSending = sendingId === item.id;
 
     return (
       <View
@@ -114,8 +126,12 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
 
         <Text style={[styles.name, { color: theme.text }]}>{displayName}</Text>
 
-        <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-          <Ionicons name="send" size={18} color="#fff" />
+        <TouchableOpacity style={styles.sendBtn} onPress={handleSend} disabled={isSending}>
+          {isSending ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Ionicons name="send" size={18} color="#fff" />
+          )}
         </TouchableOpacity>
       </View>
     );
