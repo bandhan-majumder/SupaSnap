@@ -1,9 +1,9 @@
-import { TouchableOpacity, View } from "react-native";
-import IconButton from "./icon-button";
-import { ThemedText } from "./themed-text";
+import { TouchableOpacity } from "react-native";
+import IconButton from "../../common/icon-button";
+import { ThemedText } from "../../themed-text";
 
 interface QRCodeButtonProps {
-    handleOpenQRCode: () => void;
+  handleOpenQRCode: () => void;
 }
 
 export default function QRCodeButton({ handleOpenQRCode }: QRCodeButtonProps) {

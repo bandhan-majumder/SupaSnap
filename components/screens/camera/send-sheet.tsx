@@ -1,4 +1,6 @@
-import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
+import AppBottomSheet, {
+  BottomSheetMethods,
+} from "@/components/common/bottom-sheet";
 import { Colors } from "@/constants/theme";
 import { ChatRoom, useConversations, useMessages } from "@/hooks/use-chats";
 import { useUpload } from "@/hooks/use-upload";

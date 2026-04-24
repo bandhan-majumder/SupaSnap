@@ -1,15 +1,18 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import IconButton from "./icon-button";
-import { Link } from "expo-router";
-import { ThemedText } from "./themed-text";
 import { CameraMode } from "expo-camera";
+import { Link } from "expo-router";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import IconButton from "../../common/icon-button";
+import { ThemedText } from "../../themed-text";
 
 interface BottomRowToolsProp {
-    setCameraMode: React.Dispatch<React.SetStateAction<CameraMode>>;
-    cameraMode: CameraMode;
-};
+  setCameraMode: React.Dispatch<React.SetStateAction<CameraMode>>;
+  cameraMode: CameraMode;
+}
 
-export default function ButtonRowTools({ setCameraMode, cameraMode }: BottomRowToolsProp) {
+export default function ButtonRowTools({
+  setCameraMode,
+  cameraMode,
+}: BottomRowToolsProp) {
   return (
     <View style={[styles.bottomContainer, styles.directionRowItemsCenter]}>
       <Link asChild href={"/media-library"}>
@@ -17,16 +20,23 @@ export default function ButtonRowTools({ setCameraMode, cameraMode }: BottomRowT
       </Link>
       <View style={styles.directionRowItemsCenter}>
         <TouchableOpacity>
-            <ThemedText onPress={() => setCameraMode("picture")} style={{
-                fontWeight: cameraMode === "picture" ? "bold" : "100"
-            }}>
-                SupaSnap
-            </ThemedText>
+          <ThemedText
+            onPress={() => setCameraMode("picture")}
+            style={{
+              fontWeight: cameraMode === "picture" ? "bold" : "100",
+            }}
+          >
+            SupaSnap
+          </ThemedText>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setCameraMode("video")}>
-            <ThemedText style={{
-                fontWeight: cameraMode === "video" ? "bold" : "100"
-            }}>Video</ThemedText>
+          <ThemedText
+            style={{
+              fontWeight: cameraMode === "video" ? "bold" : "100",
+            }}
+          >
+            Video
+          </ThemedText>
         </TouchableOpacity>
       </View>
       <IconButton androidName="add" iosName="magnifyingglass" />
@@ -46,6 +56,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignSelf: "center",
     bottom: 6,
-    padding: 12
+    padding: 12,
   },
 });

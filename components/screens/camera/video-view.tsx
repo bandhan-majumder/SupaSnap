@@ -5,8 +5,8 @@ import { shareAsync } from "expo-sharing";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useRef } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
-import IconButton from "./icon-button";
-import SendSheet, { SendSheetRef } from "./send-sheet";
+import IconButton from "@/components/common/icon-button";
+import SendSheet, { SendSheetRef } from "@/components/screens/camera/send-sheet";
 
 interface VideoViewComponentProps {
   video: string;

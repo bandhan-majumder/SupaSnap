@@ -1,5 +1,5 @@
 import { StyleSheet, ImageBackground } from "react-native";
-import AuthComponent from "@/components/auth";
+import AuthComponent from "@/components/auth/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthScreen() {

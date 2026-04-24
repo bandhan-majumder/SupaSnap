@@ -1,5 +1,5 @@
-import PermissionsScreen from "@/components/permissions-check";
-import UsernameSetup from "@/components/username-setup";
+import PermissionsScreen from "@/components/onboarding/permissions";
+import UsernameSetup from "@/components/onboarding/setup";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/hooks/use-auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";

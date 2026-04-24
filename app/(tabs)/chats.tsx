@@ -1,5 +1,7 @@
-import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
-import UserPickerSheet from "@/components/user-picker-sheet";
+import AppBottomSheet, {
+  BottomSheetMethods,
+} from "@/components/common/bottom-sheet";
+import UserPickerSheet from "@/components/screens/chats/user-picker-sheet";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/hooks/use-auth";
 import {

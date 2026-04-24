@@ -1,7 +1,7 @@
 import { FlashMode } from "expo-camera";
 import { Dispatch, SetStateAction } from "react";
 import { View } from "react-native";
-import IconButton from "./icon-button";
+import IconButton from "../../common/icon-button";
 
 interface CameraToolsProps {
   cameraZoom: number;

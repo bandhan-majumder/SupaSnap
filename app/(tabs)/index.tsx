@@ -1,22 +1,19 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet, View } from "react-native";
-import * as WebBrowser from "expo-web-browser";
+import ButtonRowTools from "@/components/screens/camera/bottom-row-tools";
+import CameraTools from "@/components/screens/camera/camera-tools";
+import MainRowAction from "@/components/screens/camera/main-row-actionts";
+import PictureView from "@/components/screens/camera/picture-view";
+import QRCodeButton from "@/components/screens/camera/qr-code-button";
+import VideoViewComponent from "@/components/screens/camera/video-view";
 import {
   BarcodeScanningResult,
-  Camera,
   CameraMode,
   CameraView,
   FlashMode,
 } from "expo-camera";
-import React, { useEffect } from "react";
-import IconButton from "@/components/icon-button";
-import ButtonRowTools from "@/components/bottom-row-tools";
-import MainRowAction from "@/components/main-row-actionts";
-import QRCodeButton from "@/components/qr-code-button";
-import CameraTools from "@/components/camera-tools";
+import * as WebBrowser from "expo-web-browser";
+import React from "react";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import PictureView from "@/components/picture-view";
-import VideoViewComponent from "@/components/video-view";
 
 export default function HomeScreen() {
   const cameraRef = React.useRef<CameraView>(null);
@@ -34,24 +31,24 @@ export default function HomeScreen() {
   const [video, setVideo] = React.useState<string>("");
   const [isRecording, setIsRecording] = React.useState<boolean>(false);
 
-  async function handleTakePicture(){
+  async function handleTakePicture() {
     const response = await cameraRef.current?.takePictureAsync({
       // quality: 1,
-    })
+    });
     setPicture(response!.uri);
   }
 
-  async function toggleRecord(){
-   if (isRecording){
-    cameraRef.current?.stopRecording();
-    setIsRecording(false);
-   }else {
-    setIsRecording(true);
-    const response = await cameraRef.current?.recordAsync({
-      // maxDuration: 10000
-    });
-    setVideo(response!.uri)
-   }
+  async function toggleRecord() {
+    if (isRecording) {
+      cameraRef.current?.stopRecording();
+      setIsRecording(false);
+    } else {
+      setIsRecording(true);
+      const response = await cameraRef.current?.recordAsync({
+        // maxDuration: 10000
+      });
+      setVideo(response!.uri);
+    }
   }
 
   function handleBarCodeScanned(scanningResult: BarcodeScanningResult) {
@@ -78,8 +75,8 @@ export default function HomeScreen() {
   }
 
   if (isBrowser) return <></>;
-  if (picture) return <PictureView picture={picture} setPicture={setPicture}/>
-  if (video) return <VideoViewComponent video={video} setVideo={setVideo}/>
+  if (picture) return <PictureView picture={picture} setPicture={setPicture} />;
+  if (video) return <VideoViewComponent video={video} setVideo={setVideo} />;
 
   return (
     // HomeScreen
@@ -98,7 +95,7 @@ export default function HomeScreen() {
         onBarcodeScanned={handleBarCodeScanned}
       >
         <SafeAreaView style={{ flex: 1 }}>
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             {qrCodeDetected ? (
               <QRCodeButton handleOpenQRCode={handleOpenQrCode} />
             ) : null}
@@ -114,7 +111,9 @@ export default function HomeScreen() {
             />
             <MainRowAction
               cameraMode={cameraMode}
-              handleTakePicture={cameraMode === "picture" ? handleTakePicture : toggleRecord}
+              handleTakePicture={
+                cameraMode === "picture" ? handleTakePicture : toggleRecord
+              }
               isRecording={isRecording}
             />
             <ButtonRowTools

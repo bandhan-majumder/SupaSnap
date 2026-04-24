@@ -4,13 +4,8 @@ import { Image } from "expo-image";
 import { saveToLibraryAsync } from "expo-media-library";
 import { shareAsync } from "expo-sharing";
 import React, { useRef } from "react";
-import {
-  Alert,
-  StyleSheet,
-  TouchableOpacity,
-  View
-} from "react-native";
-import IconButton from "./icon-button";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import IconButton from "../../common/icon-button";
 import SendSheet, { SendSheetRef } from "./send-sheet";
 
 interface PictureViewProps {
