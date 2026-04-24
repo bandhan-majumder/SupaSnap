@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/hooks/use-auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -22,11 +23,11 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user, signIn, signUp } = useAuth();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-
   const theme = isDark ? Colors.dark : Colors.light;
 
   useEffect(() => {
@@ -41,20 +42,17 @@ export default function Auth() {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
-
     setLoading(true);
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
-        if (error) {
-          Alert.alert("Login Error", error.message);
-        }
+        if (error) Alert.alert("Login Error", error.message);
       } else {
         const { error } = await signUp(email, password);
         if (error) {
           Alert.alert("Sign Up Error", error.message);
         } else {
-          Alert.alert("Success", "Signup successfull");
+          Alert.alert("Success", "Signup successful!");
         }
       }
     } finally {
@@ -66,7 +64,6 @@ export default function Auth() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -74,28 +71,24 @@ export default function Auth() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={[styles.title, { color: "#ECEDEE" }]}>SupaSnap</Text>
           <Text style={[styles.subtitle, { color: theme.icon }]}>
             {isLogin ? "Welcome back!" : "Create an account"}
           </Text>
         </View>
 
         <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: theme.label }]}>
-              Email
-            </Text>
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: theme.label }]}>Email</Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  backgroundColor: "#00000000",
-                  color: "#000000",
-                  borderColor: isDark ? "#333" : "#ddd",
+                  color: isDark ? "#fff" : "#111",
+                  borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
                 },
               ]}
               placeholder="Enter your email"
-              placeholderTextColor={isDark ? "#666" : "#999"}
+              placeholderTextColor={isDark ? "#555" : "#aaa"}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -105,32 +98,40 @@ export default function Auth() {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: theme.label }]}>
-              Password
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: "#00000000",
-                  color: "#000000",
-                  borderColor: isDark ? "#333" : "#ddd",
-                },
-              ]}
-              placeholder="Enter your password"
-              placeholderTextColor={isDark ? "#666" : "#999"}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              keyboardAppearance={isDark ? "dark" : "light"}
-            />
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: theme.label }]}>Password</Text>
+            <View style={[
+              styles.passwordWrapper,
+              { borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)" }
+            ]}>
+              <TextInput
+                style={[styles.passwordInput, { color: isDark ? "#fff" : "#111" }]}
+                placeholder="Enter your password"
+                placeholderTextColor={isDark ? "#555" : "#aaa"}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                keyboardAppearance={isDark ? "dark" : "light"}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                activeOpacity={0.7}
+                style={styles.eyeButton}
+              >
+                <Text style={[styles.eyeText, { color: isDark ? "#666" : "#aaa" }]}>
+                  {showPassword ? <Ionicons name="eye" /> : <Ionicons name="eye-off" />}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.supaPrimary }]}
+            style={[styles.button, { backgroundColor: '#F6C15A' }]}
             onPress={handleAuth}
             disabled={loading}
+            activeOpacity={0.85}
           >
             {loading ? (
               <ActivityIndicator color="#000" />
@@ -144,24 +145,15 @@ export default function Auth() {
           <TouchableOpacity
             style={styles.switchButton}
             onPress={() => setIsLogin(!isLogin)}
+            activeOpacity={0.7}
           >
-            <Text style={[styles.switchText, { color: theme.tint }]}>
-              {isLogin
-                ? "Don't have an account? "
-                : "Already have an account? "}
-              <Text style={{ fontWeight: "bold" }}>
+            <Text style={[styles.switchText, { color: theme.text }]}>
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              <Text style={styles.switchBold}>
                 {isLogin ? "Sign Up" : "Sign In"}
               </Text>
             </Text>
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.footer}>
-          <Text
-            style={[styles.footerText, { color: isDark ? "#666" : "#999" }]}
-          >
-            By continuing, you agree to our Terms & Privacy Policy
-          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -174,34 +166,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 24,
     justifyContent: "center",
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logoText: {
-    fontSize: 28,
-    fontWeight: "bold",
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
   header: {
     alignItems: "center",
-    marginBottom: 32,
-  },
-  title: {
-    fontSize: 42,
-    fontWeight: "bold",
-    marginBottom: 8,
-    marginTop: 40,
+    marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
@@ -209,44 +180,65 @@ const styles = StyleSheet.create({
   form: {
     gap: 20,
   },
-  inputContainer: {
+  inputGroup: {
     gap: 8,
   },
-  inputLabel: {
-    fontSize: 14,
+  label: {
+    fontSize: 13,
     fontWeight: "500",
-    marginLeft: 4,
+    marginLeft: 2,
   },
   input: {
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
     borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+  },
+  passwordWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 15,
+  },
+  eyeButton: {
+    paddingLeft: 10,
+    paddingVertical: 10,
+  },
+  eyeText: {
+    fontSize: 13,
+    fontWeight: "500",
   },
   button: {
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 30,
+    paddingVertical: 12,
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "600",
     color: "#000",
   },
   switchButton: {
     alignItems: "center",
-    padding: 12,
+    paddingVertical: 6,
   },
   switchText: {
     fontSize: 14,
   },
-  footer: {
-    marginTop: 40,
-    alignItems: "center",
-  },
-  footerText: {
-    fontSize: 12,
-    textAlign: "center",
+  switchBold: {
+    fontWeight: "bold",
   },
 });

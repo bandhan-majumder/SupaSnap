@@ -13,59 +13,39 @@ import { Colors } from "@/constants/theme";
 import { usePermissions } from "expo-media-library";
 import { useCameraPermissions, useMicrophonePermissions } from "expo-camera";
 
-interface PermissionItemProps {
-  icon: string;
-  title: string;
-  description: string;
+interface PermissionTileProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
   granted: boolean | undefined;
   onRequest: () => void;
-  theme: typeof Colors.light;
   isDark: boolean;
 }
 
-function PermissionItem({
-  icon,
-  title,
-  description,
-  granted,
-  onRequest,
-  theme,
-  isDark,
-}: PermissionItemProps) {
+function PermissionTile({ icon, label, granted, onRequest, isDark }: PermissionTileProps) {
+  const isGranted = granted === true;
+  const isPending = granted === undefined;
+
+  const iconColor = isGranted
+    ? "#F6C15A"
+    : isDark ? "#3a3a3a" : "#c8cdd8";
+
+  const tileBackground = isDark ? "#1a1a1a" : "#eef0f5";
+
   return (
     <TouchableOpacity
-      style={[
-        styles.permissionItem,
-        { backgroundColor: isDark ? "#1a1a1a" : "#f5f5f5" },
-      ]}
+      style={[styles.tile, { backgroundColor: tileBackground }]}
       onPress={onRequest}
-      disabled={granted === true}
+      disabled={isGranted}
+      activeOpacity={0.7}
     >
-      <View
-        style={[
-          styles.iconContainer,
-          { backgroundColor: granted ? "#4CAF50" : theme.supaPrimary },
-        ]}
-      >
-        {granted ? (
-          <Ionicons name="checkmark" size={20} color="#fff" />
-        ) : (
-          <Ionicons name={icon as any} size={20} color="#000" />
-        )}
-      </View>
-      <View style={styles.permissionInfo}>
-        <Text style={[styles.permissionTitle, { color: theme.text }]}>{title}</Text>
-        <Text style={[styles.permissionDesc, { color: theme.icon }]}>{description}</Text>
-      </View>
-      {granted === true ? (
-        <Text style={[styles.grantedText, { color: "#4CAF50" }]}>Granted</Text>
-      ) : granted === false ? (
-        <Text style={[styles.grantedText, { color: "#f44336" }]}>Denied</Text>
+      {isPending ? (
+        <ActivityIndicator size="small" color={isDark ? "#3a3a3a" : "#c8cdd8"} />
       ) : (
-        <View style={styles.loadingIndicator}>
-          <ActivityIndicator size="small" color={theme.tint} />
-        </View>
+        <Ionicons name={icon} size={28} color={iconColor} />
       )}
+      <Text style={[styles.tileLabel, { color: isGranted ? "#F6C15A" : isDark ? "#3a3a3a" : "#b0b5c0" }]}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -82,7 +62,6 @@ export default function PermissionsScreen({
   userEmail,
 }: PermissionsScreenProps) {
   const theme = isDark ? Colors.dark : Colors.light;
-
   const [cameraPermissions, requestCameraPermission] = useCameraPermissions();
   const [microphonePermissions, requestMicrophonePermission] = useMicrophonePermissions();
   const [mediaPermissions, requestMediaPermission] = usePermissions();
@@ -94,21 +73,16 @@ export default function PermissionsScreen({
     mediaPermissions?.granted;
 
   useEffect(() => {
-    if (allGranted) {
-      onComplete();
-    }
-  }, [])
+    if (allGranted) onComplete();
+  }, []);
 
   async function requestAllPermissions() {
     const camera = await requestCameraPermission();
     if (!camera?.granted && camera?.canAskAgain === false) return false;
-
     const mic = await requestMicrophonePermission();
     if (!mic?.granted && mic?.canAskAgain === false) return false;
-
     const media = await requestMediaPermission();
     if (!media?.granted && media?.canAskAgain === false) return false;
-
     return camera?.granted && mic?.granted && media?.granted;
   }
 
@@ -117,11 +91,9 @@ export default function PermissionsScreen({
       onComplete();
       return;
     }
-
     setIsRequesting(true);
     const granted = await requestAllPermissions();
     setIsRequesting(false);
-
     if (granted) {
       onComplete();
     } else {
@@ -133,146 +105,134 @@ export default function PermissionsScreen({
     }
   }
 
+  const username = userEmail?.split("@")[0] || "there";
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <View style={[styles.logoContainer, { borderColor: theme.supaPrimary }]}>
-            <Ionicons name="camera" size={40} color={theme.supaPrimary} />
-          </View>
-          <Text style={[styles.subtitle, { color: theme.icon }]}>
-            Hi, {userEmail?.split("@")[0] || "there"}!
+      <View style={styles.inner}>
+
+        <View style={styles.top}>
+          <Text style={[styles.greeting, { color: isDark ? "#444" : "#bbb" }]}>
+            Hey, {username}
+          </Text>
+          <Text style={[styles.heading, { color: theme.text }]}>
+            One last step
+          </Text>
+          <Text style={[styles.subheading, { color: isDark ? "#555" : "#bbb" }]}>
+            Tap each icon below to grant access,{"\n"}or allow all at once.
           </Text>
         </View>
 
-        <View style={styles.permissionsContainer}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Permissions Required
-          </Text>
-          <Text style={[styles.sectionDesc, { color: theme.icon }]}>
-            We need a few permissions to make the app work perfectly
-          </Text>
-
-          <View style={styles.permissionsList}>
-            <PermissionItem
-              icon="camera"
-              title="Camera"
-              description="Take photos and videos"
-              granted={cameraPermissions?.granted}
-              onRequest={requestCameraPermission}
-              theme={theme}
-              isDark={isDark}
-            />
-            <PermissionItem
-              icon="mic"
-              title="Microphone"
-              description="Record audio for videos"
-              granted={microphonePermissions?.granted}
-              onRequest={requestMicrophonePermission}
-              theme={theme}
-              isDark={isDark}
-            />
-            <PermissionItem
-              icon="images"
-              title="Photo Library"
-              description="Save and access your media"
-              granted={mediaPermissions?.granted}
-              onRequest={requestMediaPermission}
-              theme={theme}
-              isDark={isDark}
-            />
-          </View>
+        <View style={styles.tilesRow}>
+          <PermissionTile
+            icon="camera-outline"
+            label="Camera"
+            granted={cameraPermissions?.granted}
+            onRequest={requestCameraPermission}
+            isDark={isDark}
+          />
+          <PermissionTile
+            icon="mic-outline"
+            label="Microphone"
+            granted={microphonePermissions?.granted}
+            onRequest={requestMicrophonePermission}
+            isDark={isDark}
+          />
+          <PermissionTile
+            icon="images-outline"
+            label="Photos"
+            granted={mediaPermissions?.granted}
+            onRequest={requestMediaPermission}
+            isDark={isDark}
+          />
         </View>
+
       </View>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: isDark ? "#1a1a1a" : "#f0f0f0" }]}>
         <TouchableOpacity
           style={[
-            styles.continueButton,
-            { backgroundColor: theme.supaPrimary },
-            !allGranted && styles.continueButtonDisabled,
+            styles.button,
+            { backgroundColor: '#D8B38A' },
+            isRequesting && { opacity: 0.6 },
           ]}
           onPress={handleContinue}
-          disabled={isRequesting}
+          activeOpacity={0.85}
         >
           {isRequesting ? (
             <ActivityIndicator color="#000" />
           ) : (
-            <Text style={styles.continueButtonText}>
-              {allGranted ? "Start Snapping!" : "Grant All Permissions"}
+            <Text style={styles.buttonText}>
+              Continue
             </Text>
           )}
         </TouchableOpacity>
-
-        <Text style={[styles.footerText, { color: theme.icon }]}>
-          {allGranted
-            ? "You're all set! Tap to continue."
-            : "Tap each permission to grant access"}
-        </Text>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { flex: 1, paddingHorizontal: 24 },
-  header: {
-    alignItems: "center",
-    marginTop: 40,
-    marginBottom: 40,
+  container: {
+    flex: 1,
   },
-  logoContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 3,
-    alignItems: "center",
+  inner: {
+    flex: 1,
+    paddingHorizontal: 24,
     justifyContent: "center",
-    marginBottom: 20,
+    gap: 40,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 8,
-    textAlign: "center",
+  top: {
+    gap: 6,
   },
-  subtitle: { fontSize: 16, textAlign: "center" },
-  permissionsContainer: { flex: 1 },
-  sectionTitle: { fontSize: 20, fontWeight: "600", marginBottom: 8 },
-  sectionDesc: { fontSize: 14, marginBottom: 20 },
-  permissionsList: { gap: 12 },
-  permissionItem: {
+  greeting: {
+    fontSize: 13,
+    fontWeight: "500",
+    letterSpacing: 0.3,
+    marginBottom: 4,
+  },
+  heading: {
+    fontSize: 30,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+    lineHeight: 36,
+  },
+  subheading: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 4,
+  },
+  tilesRow: {
     flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderRadius: 16,
+    gap: 14,
   },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  tile: {
+    flex: 1,
+    aspectRatio: 1,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+    gap: 10,
   },
-  permissionInfo: { flex: 1, marginLeft: 14 },
-  permissionTitle: { fontSize: 16, fontWeight: "600", marginBottom: 2 },
-  permissionDesc: { fontSize: 13 },
-  grantedText: { fontSize: 12, fontWeight: "600" },
-  loadingIndicator: { width: 20, alignItems: "center" },
+  tileLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
   footer: {
     paddingHorizontal: 24,
-    paddingBottom: 30,
-    alignItems: "center",
+    paddingBottom: 28,
+    paddingTop: 16,
+    borderTopWidth: 1,
   },
-  continueButton: {
-    width: "100%",
-    paddingVertical: 16,
-    borderRadius: 14,
+  button: {
+    borderRadius: 30,
+    paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
   },
-  continueButtonDisabled: { opacity: 0.6 },
-  continueButtonText: { fontSize: 18, fontWeight: "600", color: "#000" },
-  footerText: { marginTop: 16, fontSize: 13, textAlign: "center" },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#000",
+  },
 });

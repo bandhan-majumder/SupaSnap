@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useProfile } from "@/hooks/use-profile";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -18,20 +19,15 @@ interface UsernameSetupProps {
   isDark: boolean;
 }
 
-export default function UsernameSetup({
-  onComplete,
-  isDark,
-}: UsernameSetupProps) {
+export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps) {
   const theme = isDark ? Colors.dark : Colors.light;
   const { updateProfile } = useProfile();
-
   const [username, setUsername] = useState("");
   const [saving, setSaving] = useState(false);
   const [inputError, setInputError] = useState<string | null>(null);
 
   const handleSaveUsername = async () => {
     const trimmed = username.trim();
-
     if (!trimmed) {
       setInputError("Username can't be empty.");
       return;
@@ -44,14 +40,10 @@ export default function UsernameSetup({
       setInputError("Only letters, numbers, and underscores allowed.");
       return;
     }
-
     setInputError(null);
     setSaving(true);
-
     const result = await updateProfile({ username: trimmed });
-
     setSaving(false);
-
     if (result.success) {
       onComplete();
     } else {
@@ -59,43 +51,40 @@ export default function UsernameSetup({
     }
   };
 
+  const isReady = username.trim().length >= 3;
+
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={styles.inner}>
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>
+          <View style={styles.top}>
+            <Text style={[styles.heading, { color: theme.text }]}>
               Pick a username
             </Text>
-            <Text style={[styles.subtitle, { color: theme.tabIconDefault }]}>
-              This is how others will find you. You can change it later.
+            <Text style={[styles.subheading, { color: isDark ? "#555" : "#bbb" }]}>
+              This is how others will find you.{"\n"}You can change it later.
             </Text>
           </View>
 
-          <View style={styles.inputWrapper}>
-            <Text style={[styles.inputPrefix, { color: theme.tabIconDefault }]}>
-              @
-            </Text>
+          <View style={[
+            styles.inputRow,
+            {
+              backgroundColor: isDark ? "#1a1a1a" : "#eef0f5",
+              borderColor: inputError
+                ? "#f87171"
+                : isReady
+                ? theme.tint
+                : "transparent",
+            },
+          ]}>
+            <Text style={[styles.prefix, { color: isDark ? "#444" : "#bbb" }]}>@</Text>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  color: theme.text,
-                  borderColor: inputError
-                    ? "#FF4D4D"
-                    : username.length > 0
-                      ? theme.tint
-                      : theme.tabIconDefault,
-                  backgroundColor: isDark ? "#1C1C1E" : "#F2F2F7",
-                },
-              ]}
+              style={[styles.input, { color: theme.text }]}
               placeholder="your_username"
-              placeholderTextColor={theme.tabIconDefault}
+              placeholderTextColor={isDark ? "#3a3a3a" : "#c0c0c0"}
               value={username}
               onChangeText={(text) => {
                 setUsername(text);
@@ -108,30 +97,37 @@ export default function UsernameSetup({
               returnKeyType="done"
               onSubmitEditing={handleSaveUsername}
             />
+            {isReady && !inputError && (
+              <Ionicons name="checkmark-circle" size={18} color={theme.tint} />
+            )}
           </View>
 
           {inputError ? (
             <Text style={styles.errorText}>{inputError}</Text>
           ) : (
-            <Text style={[styles.helperText, { color: theme.tabIconDefault }]}>
+            <Text style={[styles.helperText, { color: isDark ? "#3a3a3a" : "#c8c8c8" }]}>
               Letters, numbers, and underscores only.
             </Text>
           )}
+        </View>
 
+        <View style={[styles.footer, { borderTopColor: isDark ? "#1a1a1a" : "#f0f0f0" }]}>
           <TouchableOpacity
             style={[
               styles.button,
-              { backgroundColor: theme.tint },
-              (saving || username.trim().length === 0) && styles.buttonDisabled,
+              { backgroundColor: isReady ? '#D8B38A' : isDark ? "#1a1a1a" : "#eef0f5" },
+              (saving || !isReady) && { opacity: 0.5 },
             ]}
             onPress={handleSaveUsername}
-            disabled={saving || username.trim().length === 0}
+            disabled={saving || !isReady}
             activeOpacity={0.85}
           >
             {saving ? (
               <ActivityIndicator size="small" color="#000" />
             ) : (
-              <Text style={styles.buttonText}>Continue</Text>
+              <Text style={[styles.buttonText, { color: isReady ? "#000" : isDark ? "#333" : "#bbb" }]}>
+                Continue
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -141,12 +137,75 @@ export default function UsernameSetup({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  keyboardView: { flex: 1 },
+    container: {
+    flex: 1,
+  },
+  keyboardView: {
+    flex: 1,
+  },
   inner: {
     flex: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     justifyContent: "center",
+    gap: 16,
+  },
+  top: {
+    gap: 6,
+    marginBottom: 8,
+  },
+  heading: {
+    fontSize: 30,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+    lineHeight: 36,
+  },
+  subheading: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 4,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 14,
+    borderWidth: 1.5,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 6,
+  },
+  prefix: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    paddingVertical: 0,
+  },
+  errorText: {
+    fontSize: 12,
+    color: "#f87171",
+    marginLeft: 4,
+  },
+  helperText: {
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingBottom: 28,
+    paddingTop: 16,
+    borderTopWidth: 1,
+  },
+  button: {
+    borderRadius: 30,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: "600",
   },
   header: { marginBottom: 36 },
   title: {
@@ -169,37 +228,5 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginRight: 6,
   },
-  input: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: "500",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1.5,
-  },
-  errorText: {
-    fontSize: 13,
-    color: "#FF4D4D",
-    marginBottom: 8,
-    marginLeft: 2,
-  },
-  helperText: {
-    fontSize: 13,
-    marginBottom: 8,
-    marginLeft: 2,
-  },
-  button: {
-    marginTop: 28,
-    paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   buttonDisabled: { opacity: 0.5 },
-  buttonText: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#000",
-  },
 });
