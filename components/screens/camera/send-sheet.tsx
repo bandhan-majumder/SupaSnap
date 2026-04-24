@@ -2,9 +2,10 @@ import AppBottomSheet, {
   BottomSheetMethods,
 } from "@/components/common/bottom-sheet";
 import { Colors } from "@/constants/theme";
-import { ChatRoom, useConversations, useMessages } from "@/hooks/use-chats";
+import { useConversations, useMessages } from "@/hooks/use-chats";
 import { useUpload } from "@/hooks/use-upload";
 import { getAvatarUrl, getDisplayName, getInitials } from "@/lib/utils";
+import { ChatRoom } from "@/types/room";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import React, { useRef, useState } from "react";
