@@ -139,7 +139,7 @@ export default function ProfileScreen() {
       style={[styles.container, { backgroundColor: theme.background }]}
       edges={["top"]}
     >
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.avatarContainer}

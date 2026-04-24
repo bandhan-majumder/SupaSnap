@@ -49,6 +49,27 @@ export default function TabLayout() {
         tabBarActiveTintColor: theme.tint,
         headerShown: false,
         tabBarButton: HapticTab,
+        
+        tabBarStyle: {
+          borderRadius: 30,
+          backgroundColor: "transparent",
+        },
+        tabBarBackground: () => (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: theme.background,
+              borderRadius: 30,
+              overflow: "hidden",
+              elevation: 0, 
+              shadowOpacity: 0,
+            }}
+          />
+        ),
+        tabBarItemStyle: {
+          justifyContent: "center",
+          alignItems: "center",
+        },
       }}
     >
       <Tabs.Screen

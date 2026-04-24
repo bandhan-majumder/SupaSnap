@@ -293,7 +293,7 @@ export default function ChatRoomScreen() {
             <FlatList
               ref={flatListRef}
               data={messages}
-              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
               renderItem={renderItem}
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.messagesList}
