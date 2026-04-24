@@ -7,6 +7,8 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-gesture-handler";
 import "react-native-reanimated";
+//FIXME: not sure if this is a good place to import this css file
+import '../global.css'
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
