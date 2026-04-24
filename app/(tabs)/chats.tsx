@@ -5,8 +5,6 @@ import UserPickerSheet from "@/components/screens/chats/user-picker-sheet";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/hooks/use-auth";
 import {
-  ChatRoom,
-  Profile,
   useConversations,
   useProfiles,
 } from "@/hooks/use-chats";
@@ -17,6 +15,8 @@ import {
   getDisplayName,
   getInitials,
 } from "@/lib/utils";
+import { Profile } from "@/types/profile";
+import { ChatRoom } from "@/types/room";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
@@ -118,7 +118,8 @@ export default function ChatListScreen() {
             </Text>
             {item.last_message && (
               <Text style={[styles.timeText, { color: theme.secondaryText }]}>
-                {formatTime(item.last_message.created_at)}
+                {//@ts-ignore
+                formatTime(item.last_message.created_at)}
               </Text>
             )}
           </View>

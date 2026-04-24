@@ -20,8 +20,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import MediaViewer from "@/components/chat-media-viewer";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/hooks/use-auth";
-import { Message, useMessages } from "@/hooks/use-chats";
+import { useMessages } from "@/hooks/use-chats";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Message } from "@/types/message";
 
 const MEDIA_SIZE = Dimensions.get("window").width * 0.6;
 
@@ -98,51 +99,60 @@ const MessageItem = React.memo(
             style={[
               styles.messageBubble,
               isOwn
-                ? {
-                    backgroundColor: theme.supaPrimary,
-                    borderBottomRightRadius: 4,
-                  }
-                : {
-                    backgroundColor:
-                      colorScheme === "dark" ? "#2a2a2a" : "#e5e5e5",
-                    borderBottomLeftRadius: 4,
-                  },
+                ? { backgroundColor: theme.supaPrimary, borderBottomRightRadius: 4 }
+                : { backgroundColor: colorScheme === "dark" ? "#2a2a2a" : "#e5e5e5", borderBottomLeftRadius: 4 },
               isMedia && styles.mediaBubble,
             ]}
           >
+            {/* ── Media with overlaid timestamp ── */}
             {isImage && (
-              <ImageMessage
-                uri={item.content}
-                onPress={() => onMediaPress(item.content, "image")}
-              />
+              <View style={styles.mediaWrapper}>
+                <ImageMessage
+                  uri={item.content}
+                  onPress={() => onMediaPress(item.content, "image")}
+                />
+                <View style={styles.mediaTimeOverlay}>
+                  <Text style={styles.mediaTimeOverlayText}>
+                    {formatTime(item.created_at)}
+                  </Text>
+                </View>
+              </View>
             )}
             {isVideo && (
-              <VideoMessage
-                uri={item.content}
-                onPress={() => onMediaPress(item.content, "video")}
-              />
+              <View style={styles.mediaWrapper}>
+                <VideoMessage
+                  uri={item.content}
+                  onPress={() => onMediaPress(item.content, "video")}
+                />
+                <View style={styles.mediaTimeOverlay}>
+                  <Text style={styles.mediaTimeOverlayText}>
+                    {formatTime(item.created_at)}
+                  </Text>
+                </View>
+              </View>
             )}
 
+            {/* ── Text with timestamp below ── */}
             {!isMedia && (
-              <Text
-                style={[
-                  styles.messageText,
-                  { color: isOwn ? "#000" : theme.text },
-                ]}
-              >
-                {item.content}
-              </Text>
+              <>
+                <Text
+                  style={[
+                    styles.messageText,
+                    { color: isOwn ? "#000" : theme.text },
+                  ]}
+                >
+                  {item.content}
+                </Text>
+                <Text
+                  style={[
+                    styles.timeText,
+                    { color: isOwn ? "rgba(0,0,0,0.5)" : theme.icon },
+                  ]}
+                >
+                  {formatTime(item.created_at)}
+                </Text>
+              </>
             )}
-
-            <Text
-              style={[
-                styles.timeText,
-                { color: isOwn ? "rgba(0,0,0,0.5)" : theme.icon },
-                isMedia && styles.mediaTimeText,
-              ]}
-            >
-              {formatTime(item.created_at)}
-            </Text>
           </View>
         </View>
       </>
@@ -207,7 +217,9 @@ export default function ChatRoomScreen() {
 
   const shouldShowDate = (index: number) => {
     if (index === 0) return true;
+    //@ts-ignore
     const current = new Date(messages[index].created_at).toDateString();
+    //@ts-ignore
     const prev = new Date(messages[index - 1].created_at).toDateString();
     return current !== prev;
   };
@@ -230,7 +242,9 @@ export default function ChatRoomScreen() {
 
   const getOtherUserName = () => {
     for (const m of messages) {
+      //@ts-ignore
       if (m.sender_id !== currentUserId && m.sender?.username) {
+        //@ts-ignore
         return m.sender.username;
       }
     }
@@ -287,9 +301,10 @@ export default function ChatRoomScreen() {
               maxToRenderPerBatch={10}
               windowSize={5}
               removeClippedSubviews
-              onContentSizeChange={() =>
-                flatListRef.current?.scrollToEnd({ animated: true })
-              }
+              // onContentSizeChange={() =>
+              //   flatListRef.current?.scrollToEnd({ animated: true })
+              // }
+              inverted 
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
                   <Ionicons
@@ -360,7 +375,7 @@ const styles = StyleSheet.create({
 
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  messagesList: { padding: 16, flexGrow: 1 },
+  messagesList: { padding: 16, flexGrow: 1, flexDirection: 'column-reverse' },
 
   emptyContainer: { alignItems: "center", marginTop: 100 },
 
@@ -374,7 +389,7 @@ const styles = StyleSheet.create({
 
   ownMessageContainer: { alignItems: "flex-end" },
 
-  messageBubble: { maxWidth: "80%", padding: 12, borderRadius: 16 },
+  messageBubble: { maxWidth: "80%", padding: 8, borderRadius: 16 },
   mediaBubble: { padding: 4 },
 
   messageText: { fontSize: 16 },
@@ -406,13 +421,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingLeft: 4,
   },
-
-  timeText: { fontSize: 10, marginTop: 4, alignSelf: "flex-end" },
-
   mediaTimeText: { marginTop: 6, marginRight: 4, marginBottom: 2 },
-
   inputContainer: { flexDirection: "row", alignItems: "flex-end", padding: 12 },
-
   input: {
     flex: 1,
     borderRadius: 20,
@@ -421,7 +431,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     maxHeight: 100,
   },
-
   sendButton: {
     width: 44,
     height: 44,
@@ -429,5 +438,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
+  },
+  mediaWrapper: {
+    position: "relative",
+  },
+  mediaTimeOverlay: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+
+  mediaTimeOverlayText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "500",
+  },
+  timeText: {
+    fontSize: 10,
+    marginTop: 2,
+    alignSelf: "flex-end",
+    opacity: 0.6,
   },
 });
