@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, View, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import PermissionsScreen from "@/components/permissions-check";
+import UsernameSetup from "@/components/username-setup";
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/hooks/use-auth";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useProfile } from "@/hooks/use-profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
-import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
-import UsernameSetup from "@/components/username-setup";
-import PermissionsScreen from "@/components/permissions-check";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Step = "loading" | "username" | "permissions";
 
@@ -47,7 +47,9 @@ export default function OnboardingScreen() {
 
   if (step === "loading") {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.tint} />
         </View>

@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "./useAuth";
-import { useEffect, useState, useCallback, useRef } from "react";
 import { RealtimeChannel } from "@supabase/supabase-js";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "./use-auth";
 
 export interface Message {
   id: string;

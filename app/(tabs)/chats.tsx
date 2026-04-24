@@ -1,34 +1,34 @@
-import React, { useState, useRef } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-  Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import {
-  useConversations,
-  useProfiles,
-  ChatRoom,
-  Profile,
-} from "@/hooks/useChats";
-import { useAuth } from "@/hooks/useAuth";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
 import UserPickerSheet from "@/components/user-picker-sheet";
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  ChatRoom,
+  Profile,
+  useConversations,
+  useProfiles,
+} from "@/hooks/use-chats";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   formatTime,
   getAvatarUrl,
   getDisplayName,
   getInitials,
 } from "@/lib/utils";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ChatListScreen() {
   const router = useRouter();

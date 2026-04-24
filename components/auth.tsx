@@ -1,3 +1,7 @@
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/hooks/use-auth";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,10 +16,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useAuth } from "@/hooks/useAuth";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function Auth() {
   const router = useRouter();
@@ -74,7 +74,7 @@ export default function Auth() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={[styles.title, { color: '#ECEDEE' }]}>SupaSnap</Text>
+          <Text style={[styles.title, { color: "#ECEDEE" }]}>SupaSnap</Text>
           <Text style={[styles.subtitle, { color: theme.icon }]}>
             {isLogin ? "Welcome back!" : "Create an account"}
           </Text>
@@ -82,13 +82,15 @@ export default function Auth() {
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: theme.label }]}>Email</Text>
+            <Text style={[styles.inputLabel, { color: theme.label }]}>
+              Email
+            </Text>
             <TextInput
               style={[
                 styles.input,
                 {
                   backgroundColor: "#00000000",
-                  color: '#000000',
+                  color: "#000000",
                   borderColor: isDark ? "#333" : "#ddd",
                 },
               ]}
@@ -104,13 +106,15 @@ export default function Auth() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: theme.label }]}>Password</Text>
+            <Text style={[styles.inputLabel, { color: theme.label }]}>
+              Password
+            </Text>
             <TextInput
               style={[
                 styles.input,
                 {
                   backgroundColor: "#00000000",
-                  color: '#000000',
+                  color: "#000000",
                   borderColor: isDark ? "#333" : "#ddd",
                 },
               ]}
@@ -153,7 +157,9 @@ export default function Auth() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: isDark ? "#666" : "#999" }]}>
+          <Text
+            style={[styles.footerText, { color: isDark ? "#666" : "#999" }]}
+          >
             By continuing, you agree to our Terms & Privacy Policy
           </Text>
         </View>

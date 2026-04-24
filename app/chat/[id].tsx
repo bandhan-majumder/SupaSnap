@@ -1,6 +1,11 @@
-import React, { useState, useRef, useCallback } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { Stack, useLocalSearchParams } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
+import React, { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -9,19 +14,14 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Dimensions,
 } from "react-native";
-import { useLocalSearchParams, Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
-import { useVideoPlayer, VideoView } from "expo-video";
 
-import { useMessages, Message } from "@/hooks/useChats";
-import { useAuth } from "@/hooks/useAuth";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import MediaViewer from "@/components/chat-media-viewer";
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/hooks/use-auth";
+import { Message, useMessages } from "@/hooks/use-chats";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 const MEDIA_SIZE = Dimensions.get("window").width * 0.6;
 

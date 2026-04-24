@@ -1,13 +1,12 @@
-import { Image } from "expo-image";
-import React, { useEffect, useRef } from "react";
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
-import IconButton from "./icon-button";
+import { useAuth } from "@/hooks/use-auth";
+import { Ionicons } from "@expo/vector-icons";
 import { saveToLibraryAsync } from "expo-media-library";
 import { shareAsync } from "expo-sharing";
 import { useVideoPlayer, VideoView } from "expo-video";
+import React, { useEffect, useRef } from "react";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import IconButton from "./icon-button";
 import SendSheet, { SendSheetRef } from "./send-sheet";
-import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "@/hooks/useAuth";
 
 interface VideoViewComponentProps {
   video: string;
@@ -25,7 +24,7 @@ export default function VideoViewComponent({
 
   const handleSendPress = () => {
     if (user?.id) {
-      sendSheetRef.current?.open(video, true, user.id, 'video');
+      sendSheetRef.current?.open(video, true, user.id, "video");
     }
   };
 
@@ -97,10 +96,7 @@ export default function VideoViewComponent({
           height: "100%",
         }}
       />
-      <TouchableOpacity
-        style={styles.sendButton}
-        onPress={handleSendPress}
-      >
+      <TouchableOpacity style={styles.sendButton} onPress={handleSendPress}>
         <Ionicons name="send" size={20} color="#fff" />
       </TouchableOpacity>
 

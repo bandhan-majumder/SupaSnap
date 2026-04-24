@@ -1,20 +1,16 @@
+import { useAuth } from "@/hooks/use-auth";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { saveToLibraryAsync } from "expo-media-library";
+import { shareAsync } from "expo-sharing";
 import React, { useRef } from "react";
 import {
   Alert,
-  Text,
-  TouchableOpacity,
-  View,
   StyleSheet,
-  FlatList,
-  useColorScheme,
+  TouchableOpacity,
+  View
 } from "react-native";
 import IconButton from "./icon-button";
-import { saveToLibraryAsync } from "expo-media-library";
-import { shareAsync } from "expo-sharing";
-import { Ionicons } from "@expo/vector-icons";
-import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
-import { useAuth } from "@/hooks/useAuth";
 import SendSheet, { SendSheetRef } from "./send-sheet";
 
 interface PictureViewProps {
@@ -27,13 +23,13 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
   const { user } = useAuth();
   const sendSheetRef = useRef<SendSheetRef>(null);
 
-  if(!user?.id){
+  if (!user?.id) {
     return;
   }
 
   const handleSendPress = () => {
     if (user?.id) {
-      sendSheetRef.current?.open(picture, false, user.id, 'image');
+      sendSheetRef.current?.open(picture, false, user.id, "image");
     }
   };
 
@@ -70,10 +66,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
         contentFit="cover"
       />
 
-      <TouchableOpacity
-        style={styles.sendButton}
-        onPress={handleSendPress}
-      >
+      <TouchableOpacity style={styles.sendButton} onPress={handleSendPress}>
         <Ionicons name="send" size={20} color="#fff" />
       </TouchableOpacity>
 

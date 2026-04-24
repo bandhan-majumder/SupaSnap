@@ -1,24 +1,27 @@
+import { Colors } from "@/constants/theme";
+import { useProfile } from "@/hooks/use-profile";
+import { useState } from "react";
 import {
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-  TextInput,
-  KeyboardAvoidingView,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "@/constants/theme";
-import { useProfile } from "@/hooks/useProfile";
-import { useState } from "react";
 
 interface UsernameSetupProps {
   onComplete: () => void;
   isDark: boolean;
 }
 
-export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps) {
+export default function UsernameSetup({
+  onComplete,
+  isDark,
+}: UsernameSetupProps) {
   const theme = isDark ? Colors.dark : Colors.light;
   const { updateProfile } = useProfile();
 
@@ -57,7 +60,9 @@ export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -73,7 +78,9 @@ export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps
           </View>
 
           <View style={styles.inputWrapper}>
-            <Text style={[styles.inputPrefix, { color: theme.tabIconDefault }]}>@</Text>
+            <Text style={[styles.inputPrefix, { color: theme.tabIconDefault }]}>
+              @
+            </Text>
             <TextInput
               style={[
                 styles.input,
@@ -82,8 +89,8 @@ export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps
                   borderColor: inputError
                     ? "#FF4D4D"
                     : username.length > 0
-                    ? theme.tint
-                    : theme.tabIconDefault,
+                      ? theme.tint
+                      : theme.tabIconDefault,
                   backgroundColor: isDark ? "#1C1C1E" : "#F2F2F7",
                 },
               ]}

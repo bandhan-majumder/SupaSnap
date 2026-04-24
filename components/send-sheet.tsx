@@ -1,24 +1,29 @@
+import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
+import { Colors } from "@/constants/theme";
+import { ChatRoom, useConversations, useMessages } from "@/hooks/use-chats";
+import { useUpload } from "@/hooks/use-upload";
+import { getAvatarUrl, getDisplayName, getInitials } from "@/lib/utils";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import React, { useRef, useState } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  useColorScheme,
-  Alert,
   ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
-import AppBottomSheet, { BottomSheetMethods } from "@/components/bottom-sheet";
-import { ChatRoom, useConversations, useMessages } from "@/hooks/useChats";
-import { getAvatarUrl, getDisplayName, getInitials } from "@/lib/utils";
-import { Colors } from "@/constants/theme";
-import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
-import { useUpload } from "@/hooks/useUpload";
 
 export interface SendSheetRef {
-  open: (fileUri: string, isVideo: boolean, userId: string, mediaType: 'video' | 'image' | undefined) => void;
+  open: (
+    fileUri: string,
+    isVideo: boolean,
+    userId: string,
+    mediaType: "video" | "image" | undefined,
+  ) => void;
 }
 
 const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
@@ -31,13 +36,18 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
   const [isVideo, setIsVideo] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<'video'|'image'>();
+  const [mediaType, setMediaType] = useState<"video" | "image">();
 
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
   React.useImperativeHandle(ref, () => ({
-    open: (uri: string, video: boolean, uid: string, mediaType: 'video' | 'image' | undefined) => {
+    open: (
+      uri: string,
+      video: boolean,
+      uid: string,
+      mediaType: "video" | "image" | undefined,
+    ) => {
       setFileUri(uri);
       setUserId(uid);
       setIsVideo(video);
@@ -46,9 +56,17 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
     },
   }));
 
-  const handleSend = async (fileUriToSend: string, conversationId: string, sendMessageFn: (url: string, type: 'text' | 'media', mediaType: 'video' | 'image' | undefined) => Promise<boolean>) => {
+  const handleSend = async (
+    fileUriToSend: string,
+    conversationId: string,
+    sendMessageFn: (
+      url: string,
+      type: "text" | "media",
+      mediaType: "video" | "image" | undefined,
+    ) => Promise<boolean>,
+  ) => {
     setSendingId(conversationId);
-    
+
     const signedUrl = await uploadMediaAndReturnSignedUrl({
       isVideo,
       fileUri: fileUriToSend,
@@ -85,58 +103,82 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
     />
   );
 
-const ConversationRow = React.memo(
-  ({ item, userId, isVideo, fileUri, theme, sendingId, onSend }: {
-    item: ChatRoom;
-    userId: string;
-    isVideo: boolean;
-    fileUri: string | null;
-    theme: typeof Colors.light;
-    sendingId: string | null;
-    onSend: (fileUri: string, conversationId: string, sendMessageFn: (url: string, type: "text" | "media", mediaType: 'image' | 'video' | undefined) => Promise<boolean>) => void;
-  }) => {
-    const displayName = getDisplayName(item, userId);
-    const avatarUrl = getAvatarUrl(item, userId);
-    const { sendMessage } = useMessages(item.id);
+  const ConversationRow = React.memo(
+    ({
+      item,
+      userId,
+      isVideo,
+      fileUri,
+      theme,
+      sendingId,
+      onSend,
+    }: {
+      item: ChatRoom;
+      userId: string;
+      isVideo: boolean;
+      fileUri: string | null;
+      theme: typeof Colors.light;
+      sendingId: string | null;
+      onSend: (
+        fileUri: string,
+        conversationId: string,
+        sendMessageFn: (
+          url: string,
+          type: "text" | "media",
+          mediaType: "image" | "video" | undefined,
+        ) => Promise<boolean>,
+      ) => void;
+    }) => {
+      const displayName = getDisplayName(item, userId);
+      const avatarUrl = getAvatarUrl(item, userId);
+      const { sendMessage } = useMessages(item.id);
 
-    const handleSend = () => {
-      if (!fileUri) return;
-      onSend(fileUri, item.id, sendMessage);
-    };
+      const handleSend = () => {
+        if (!fileUri) return;
+        onSend(fileUri, item.id, sendMessage);
+      };
 
-    const isSending = sendingId === item.id;
+      const isSending = sendingId === item.id;
 
-    return (
-      <View
-        style={[
-          styles.row,
-          {
-            backgroundColor: theme.surface,
-            borderColor: theme.border,
-          },
-        ]}
-      >
-        {avatarUrl ? (
-          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-        ) : (
-          <View style={[styles.avatar, { backgroundColor: theme.supaPrimary }]}>
-            <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
-          </View>
-        )}
-
-        <Text style={[styles.name, { color: theme.text }]}>{displayName}</Text>
-
-        <TouchableOpacity style={styles.sendBtn} onPress={handleSend} disabled={isSending}>
-          {isSending ? (
-            <ActivityIndicator size="small" color="#fff" />
+      return (
+        <View
+          style={[
+            styles.row,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+            },
+          ]}
+        >
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatar} />
           ) : (
-            <Ionicons name="send" size={18} color="#fff" />
+            <View
+              style={[styles.avatar, { backgroundColor: theme.supaPrimary }]}
+            >
+              <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
+            </View>
           )}
-        </TouchableOpacity>
-      </View>
-    );
-  }
-);
+
+          <Text style={[styles.name, { color: theme.text }]}>
+            {displayName}
+          </Text>
+
+          <TouchableOpacity
+            style={styles.sendBtn}
+            onPress={handleSend}
+            disabled={isSending}
+          >
+            {isSending ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="send" size={18} color="#fff" />
+            )}
+          </TouchableOpacity>
+        </View>
+      );
+    },
+  );
 
   return (
     <AppBottomSheet ref={bottomSheetRef} snapPoints={[250, 500]}>

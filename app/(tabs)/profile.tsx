@@ -1,7 +1,14 @@
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/hooks/use-auth";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useProfile } from "@/hooks/use-profile";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
   ActivityIndicator,
+  Alert,
   Image,
   Modal,
   ScrollView,
@@ -12,22 +19,23 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { profile, loading, uploading, updating, error, updateProfile, updateAvatar } = useProfile();
+  const {
+    profile,
+    loading,
+    uploading,
+    updating,
+    error,
+    updateProfile,
+    updateAvatar,
+  } = useProfile();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
-  const displayName = '@'+profile?.username || 'randomuse32';
+  const displayName = "@" + profile?.username || "randomuse32";
   const initials = displayName.slice(1, 2).toUpperCase();
 
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -66,9 +74,13 @@ export default function ProfileScreen() {
 
   const handlePickImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission Required", "Please grant photo library access.");
+        Alert.alert(
+          "Permission Required",
+          "Please grant photo library access.",
+        );
         return;
       }
 
@@ -96,26 +108,25 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            await signOut();
-            router.replace("/auth" as any);
-          },
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await signOut();
+          router.replace("/auth" as any);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={["top"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+        edges={["top"]}
+      >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.tint} />
         </View>
@@ -124,7 +135,10 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={["top"]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+      edges={["top"]}
+    >
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -133,9 +147,14 @@ export default function ProfileScreen() {
             disabled={uploading}
           >
             {profile?.avatar_url ? (
-              <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
+              <Image
+                source={{ uri: profile.avatar_url }}
+                style={styles.avatarImage}
+              />
             ) : (
-              <View style={[styles.avatar, { backgroundColor: theme.supaPrimary }]}>
+              <View
+                style={[styles.avatar, { backgroundColor: theme.supaPrimary }]}
+              >
                 <Text style={styles.avatarText}>{initials}</Text>
               </View>
             )}
@@ -147,68 +166,141 @@ export default function ProfileScreen() {
               )}
             </View>
           </TouchableOpacity>
-          <Text style={[styles.displayName, { color: theme.text }]}>{displayName}</Text>
+          <Text style={[styles.displayName, { color: theme.text }]}>
+            {displayName}
+          </Text>
           {profile?.full_name ? (
-            <Text style={[styles.email, { color: theme.icon }]}>{profile.full_name}</Text>
+            <Text style={[styles.email, { color: theme.icon }]}>
+              {profile.full_name}
+            </Text>
           ) : (
             <TouchableOpacity onPress={handleProfileInfo}>
-              <Text style={[styles.email, { color: theme.tint }]}>Set up Full Name</Text>
+              <Text style={[styles.email, { color: theme.tint }]}>
+                Set up Full Name
+              </Text>
             </TouchableOpacity>
           )}
-          <Text style={[styles.tapHint, { color: theme.icon }]}>Tap camera icon to change photo</Text>
+          <Text style={[styles.tapHint, { color: theme.icon }]}>
+            Tap camera icon to change photo
+          </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Account</Text>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            Account
+          </Text>
 
           <TouchableOpacity
-            style={[styles.menuItem, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5",
+              },
+            ]}
             onPress={handleProfileInfo}
           >
             <Ionicons name="person-outline" size={22} color={theme.text} />
             <View style={styles.menuItemContent}>
-              <Text style={[styles.menuItemTitle, { color: theme.text }]}>Profile Info</Text>
-              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>View your account details</Text>
+              <Text style={[styles.menuItemTitle, { color: theme.text }]}>
+                Profile Info
+              </Text>
+              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
+                View your account details
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}>
+          <TouchableOpacity
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5",
+              },
+            ]}
+          >
             <Ionicons name="settings-outline" size={22} color={theme.text} />
             <View style={styles.menuItemContent}>
-              <Text style={[styles.menuItemTitle, { color: theme.text }]}>Settings</Text>
-              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>App preferences and options</Text>
+              <Text style={[styles.menuItemTitle, { color: theme.text }]}>
+                Settings
+              </Text>
+              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
+                App preferences and options
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}>
-            <Ionicons name="shield-checkmark-outline" size={22} color={theme.text} />
+          <TouchableOpacity
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5",
+              },
+            ]}
+          >
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={22}
+              color={theme.text}
+            />
             <View style={styles.menuItemContent}>
-              <Text style={[styles.menuItemTitle, { color: theme.text }]}>Privacy</Text>
-              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>Control your privacy settings</Text>
+              <Text style={[styles.menuItemTitle, { color: theme.text }]}>
+                Privacy
+              </Text>
+              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
+                Control your privacy settings
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Support</Text>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            Support
+          </Text>
 
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}>
+          <TouchableOpacity
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5",
+              },
+            ]}
+          >
             <Ionicons name="help-circle-outline" size={22} color={theme.text} />
             <View style={styles.menuItemContent}>
-              <Text style={[styles.menuItemTitle, { color: theme.text }]}>Help Center</Text>
-              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>Get help and support</Text>
+              <Text style={[styles.menuItemTitle, { color: theme.text }]}>
+                Help Center
+              </Text>
+              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
+                Get help and support
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}>
-            <Ionicons name="information-circle-outline" size={22} color={theme.text} />
+          <TouchableOpacity
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5",
+              },
+            ]}
+          >
+            <Ionicons
+              name="information-circle-outline"
+              size={22}
+              color={theme.text}
+            />
             <View style={styles.menuItemContent}>
-              <Text style={[styles.menuItemTitle, { color: theme.text }]}>About</Text>
-              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>App version 1.0.0</Text>
+              <Text style={[styles.menuItemTitle, { color: theme.text }]}>
+                About
+              </Text>
+              <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
+                App version 1.0.0
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
           </TouchableOpacity>
@@ -230,12 +322,25 @@ export default function ProfileScreen() {
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Edit Profile</Text>
+          <View
+            style={[styles.modalContent, { backgroundColor: theme.background }]}
+          >
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              Edit Profile
+            </Text>
 
-            <Text style={[styles.inputLabel, { color: theme.text }]}>Username</Text>
+            <Text style={[styles.inputLabel, { color: theme.text }]}>
+              Username
+            </Text>
             <TextInput
-              style={[styles.input, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5", color: theme.text }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor:
+                    colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5",
+                  color: theme.text,
+                },
+              ]}
               value={editUsername}
               onChangeText={setEditUsername}
               placeholder="Enter username"
@@ -243,9 +348,18 @@ export default function ProfileScreen() {
               autoCapitalize="none"
             />
 
-            <Text style={[styles.inputLabel, { color: theme.text }]}>Full Name</Text>
+            <Text style={[styles.inputLabel, { color: theme.text }]}>
+              Full Name
+            </Text>
             <TextInput
-              style={[styles.input, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5", color: theme.text }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor:
+                    colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5",
+                  color: theme.text,
+                },
+              ]}
               value={editFullName}
               onChangeText={setEditFullName}
               placeholder="Enter full name"
@@ -254,10 +368,18 @@ export default function ProfileScreen() {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5" }]}
+                style={[
+                  styles.modalButton,
+                  {
+                    backgroundColor:
+                      colorScheme === "dark" ? "#1a1a1a" : "#f5f5f5",
+                  },
+                ]}
                 onPress={() => setEditModalVisible(false)}
               >
-                <Text style={[styles.modalButtonText, { color: theme.text }]}>Cancel</Text>
+                <Text style={[styles.modalButtonText, { color: theme.text }]}>
+                  Cancel
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: theme.tint }]}
@@ -267,7 +389,9 @@ export default function ProfileScreen() {
                 {updating ? (
                   <ActivityIndicator size="small" color="#000" />
                 ) : (
-                  <Text style={[styles.modalButtonText, { color: "#000" }]}>Save</Text>
+                  <Text style={[styles.modalButtonText, { color: "#000" }]}>
+                    Save
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>

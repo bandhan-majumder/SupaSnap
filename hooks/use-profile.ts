@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "./useAuth";
-import { useUpload } from "./useUpload";
+import { useAuth } from "./use-auth";
+import { useUpload } from "./use-upload";
 
 export interface Profile {
   id: string;
