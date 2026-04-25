@@ -17,8 +17,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export default function Auth() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -39,20 +41,20 @@ export default function Auth() {
 
   async function handleAuth() {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+      Alert.alert(t("auth.error"), t("auth.pleaseFillInAllFields"));
       return;
     }
     setLoading(true);
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
-        if (error) Alert.alert("Login Error", error.message);
+        if (error) Alert.alert(t("auth.loginError"), error.message);
       } else {
         const { error } = await signUp(email, password);
         if (error) {
-          Alert.alert("Sign Up Error", error.message);
+          Alert.alert(t("auth.signUpError"), error.message);
         } else {
-          Alert.alert("Success", "Signup successful!");
+          Alert.alert(t("auth.success"), t("auth.signupSuccessful"));
         }
       }
     } finally {
@@ -72,13 +74,13 @@ export default function Auth() {
       >
         <View style={styles.header}>
           <Text style={[styles.subtitle, { color: theme.icon }]}>
-            {isLogin ? "Welcome back!" : "Create an account"}
+            {isLogin ? t("auth.welcomeBack") : t("auth.createAnAccount")}
           </Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.label }]}>Email</Text>
+            <Text style={[styles.label, { color: theme.label }]}>{t("auth.email")}</Text>
             <TextInput
               style={[
                 styles.input,
@@ -87,7 +89,7 @@ export default function Auth() {
                   borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
                 },
               ]}
-              placeholder="Enter your email"
+              placeholder={t("auth.enterYourEmail")}
               placeholderTextColor={isDark ? "#555" : "#aaa"}
               value={email}
               onChangeText={setEmail}
@@ -99,14 +101,14 @@ export default function Auth() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.label }]}>Password</Text>
+            <Text style={[styles.label, { color: theme.label }]}>{t("auth.password")}</Text>
             <View style={[
               styles.passwordWrapper,
               { borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)" }
             ]}>
               <TextInput
                 style={[styles.passwordInput, { color: isDark ? "#fff" : "#111" }]}
-                placeholder="Enter your password"
+                placeholder={t("auth.enterYourPassword")}
                 placeholderTextColor={isDark ? "#555" : "#aaa"}
                 value={password}
                 onChangeText={setPassword}
@@ -137,7 +139,7 @@ export default function Auth() {
               <ActivityIndicator color="#000" />
             ) : (
               <Text style={styles.buttonText}>
-                {isLogin ? "Sign In" : "Sign Up"}
+                {isLogin ? t("auth.signIn") : t("auth.signUp")}
               </Text>
             )}
           </TouchableOpacity>
@@ -148,9 +150,9 @@ export default function Auth() {
             activeOpacity={0.7}
           >
             <Text style={[styles.switchText, { color: theme.text }]}>
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              {isLogin ? t("auth.noAccount") : t("auth.hasAccount")}
               <Text style={styles.switchBold}>
-                {isLogin ? "Sign Up" : "Sign In"}
+                {isLogin ? t("auth.signUp") : t("auth.signIn")}
               </Text>
             </Text>
           </TouchableOpacity>

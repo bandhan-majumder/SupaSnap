@@ -1,33 +1,36 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 export default function TermsScreen() {
+  const { t } = useTranslation();
+  
   return (
     <SafeAreaView style={styles.root}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Terms & Privacy</Text>
+        <Text style={styles.title}>{t("terms.title")}</Text>
 
-        <Section title="Use">
+        <Section title={t("terms.use")}>
           Use the app responsibly. No misuse or illegal activity.
         </Section>
 
-        <Section title="Account">
-          You’re responsible for your account and its security.
+        <Section title={t("terms.account")}>
+          You're responsible for your account and its security.
         </Section>
 
-        <Section title="Data">
+        <Section title={t("terms.data")}>
           We collect basic info to improve your experience.
         </Section>
 
-        <Section title="Privacy">
+        <Section title={t("terms.privacy")}>
           Your data is not sold and is handled securely.
         </Section>
 
-        <Section title="Updates">
+        <Section title={t("terms.updates")}>
           Terms may change. Continued use means acceptance.
         </Section>
 
-        <Section title="Contact">
+        <Section title={t("terms.contact")}>
           support@supasnap.com
         </Section>
       </ScrollView>

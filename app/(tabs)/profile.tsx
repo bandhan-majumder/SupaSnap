@@ -18,9 +18,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, signOut } = useAuth();
   const {
@@ -56,9 +58,12 @@ export default function ProfileScreen() {
 
     if (result.success) {
       setEditModalVisible(false);
-      Alert.alert("Success", "Profile updated!");
+      Alert.alert(t("common.success"), t("profile.profileUpdated"));
     } else {
-      Alert.alert("Error", result.error || "Failed to update profile");
+      Alert.alert(
+        t("common.error"),
+        result.error || t("profile.failedToUpdateProfile"),
+      );
     }
   };
 
@@ -68,7 +73,7 @@ export default function ProfileScreen() {
 
   React.useEffect(() => {
     if (error) {
-      Alert.alert("Error", error);
+      Alert.alert(t("common.error"), error);
     }
   }, [error]);
 
@@ -77,10 +82,7 @@ export default function ProfileScreen() {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Permission Required",
-          "Please grant photo library access.",
-        );
+        Alert.alert("Permission Required", t("profile.photoLibraryAccess"));
         return;
       }
 
@@ -96,19 +98,22 @@ export default function ProfileScreen() {
       if (!result.canceled && result.assets?.[0]?.uri) {
         const success = await updateAvatar(result.assets[0].uri);
         if (success) {
-          Alert.alert("Success", "Profile picture updated!");
+          Alert.alert(t("common.success"), t("profile.profilePictureUpdated"));
         } else {
-          Alert.alert("Error", "Failed to update profile picture.");
+          Alert.alert(
+            t("common.error"),
+            t("profile.failedToUpdateProfilePicture"),
+          );
         }
       }
     } catch (err) {
-      console.log("Image picker error:", err);
-      Alert.alert("Error", "Unable to pick image. Please try again.");
+      console.log("Image picker error: ", err);
+      Alert.alert(t("common.error"), t("profile.unableToPickImage"));
     }
   };
 
   const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
+    Alert.alert(t("profile.logout"), t("profile.areYouSureYouWantToLogout"), [
       { text: "Cancel", style: "cancel" },
       {
         text: "Logout",
@@ -139,7 +144,10 @@ export default function ProfileScreen() {
       style={[styles.container, { backgroundColor: theme.background }]}
       edges={["top"]}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.avatarContainer}
@@ -246,7 +254,7 @@ export default function ProfileScreen() {
             />
             <View style={styles.menuItemContent}>
               <Text style={[styles.menuItemTitle, { color: theme.text }]}>
-                Privacy
+                Privacy={t("profile.privacy")}
               </Text>
               <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
                 Control your privacy settings
@@ -343,7 +351,7 @@ export default function ProfileScreen() {
               ]}
               value={editUsername}
               onChangeText={setEditUsername}
-              placeholder="Enter username"
+              placeholder={t("profile.enterUsername")}
               placeholderTextColor={theme.icon}
               autoCapitalize="none"
             />
@@ -362,7 +370,7 @@ export default function ProfileScreen() {
               ]}
               value={editFullName}
               onChangeText={setEditFullName}
-              placeholder="Enter full name"
+              placeholder={t("profile.enterFullName")}
               placeholderTextColor={theme.icon}
             />
 

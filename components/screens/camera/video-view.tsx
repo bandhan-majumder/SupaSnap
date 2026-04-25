@@ -5,6 +5,7 @@ import { shareAsync } from "expo-sharing";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useRef } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import IconButton from "@/components/common/icon-button";
 import SendSheet, { SendSheetRef } from "@/components/screens/camera/send-sheet";
 
@@ -16,6 +17,7 @@ export default function VideoViewComponent({
   video,
   setVideo,
 }: VideoViewComponentProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const videViewRef = React.useRef<VideoView>(null);
   const [isPlaying, setIsPlaying] = React.useState(true);
@@ -64,7 +66,7 @@ export default function VideoViewComponent({
           androidName="arrow-down"
           onPress={async () => {
             await saveToLibraryAsync(video);
-            Alert.alert("Video saved!");
+            Alert.alert(t("camera.videoSaved"));
           }}
         />
         <IconButton

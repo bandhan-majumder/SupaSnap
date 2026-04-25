@@ -19,6 +19,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export interface SendSheetRef {
   open: (
@@ -32,6 +33,7 @@ export interface SendSheetRef {
 const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
   const bottomSheetRef = useRef<BottomSheetMethods>(null);
 
+  const { t } = useTranslation();
   const { conversations } = useConversations();
   const { uploadMediaAndReturnSignedUrl } = useUpload();
 
@@ -77,7 +79,7 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
 
     if (!signedUrl) {
       setSendingId(null);
-      Alert.alert("Failed to send");
+      Alert.alert(t("camera.failedToSend"));
       return;
     }
 
@@ -85,13 +87,13 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
 
     if (!message) {
       setSendingId(null);
-      Alert.alert("Failed to send message");
+      Alert.alert(t("camera.failedToSendMessage"));
       return;
     }
 
     setSendingId(null);
     bottomSheetRef.current?.close();
-    Alert.alert("Sent!");
+    Alert.alert(t("camera.sent"));
   };
 
   const renderConversation = ({ item }: { item: ChatRoom }) => (

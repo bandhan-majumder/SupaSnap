@@ -9,6 +9,7 @@ import {
   Image,
   StyleSheet,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export default function UserPickerSheet({
   theme,
@@ -23,10 +24,11 @@ export default function UserPickerSheet({
   getInitials,
   isUser,
 }: any) {
+  const { t } = useTranslation();
   return (
     <View>
       <TextInput
-        placeholder="Search by username.."
+        placeholder={t("chat.searchPlaceholder")}
         placeholderTextColor={theme.icon}
         value={searchUserName}
         onChangeText={setSearchUserName}
@@ -50,7 +52,7 @@ export default function UserPickerSheet({
           alignItems: "center",
         }}
       >
-        {searching ? <ActivityIndicator /> : <Text>Search</Text>}
+        {searching ? <ActivityIndicator /> : <Text>{t("chat.search")}</Text>}
       </TouchableOpacity>
 
       {searchResult && (
@@ -64,7 +66,7 @@ export default function UserPickerSheet({
               justifyContent: "center",
             }}
           >
-            Results
+            {t("chat.results")}
           </Text>
           <TouchableOpacity
             onPress={handleStartChat}

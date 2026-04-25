@@ -5,6 +5,7 @@ import { saveToLibraryAsync } from "expo-media-library";
 import { shareAsync } from "expo-sharing";
 import React, { useRef } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import IconButton from "../../common/icon-button";
 import SendSheet, { SendSheetRef } from "./send-sheet";
 
@@ -15,6 +16,7 @@ interface PictureViewProps {
 
 export default function PictureView({ picture, setPicture }: PictureViewProps) {
   console.log("picture is: ", picture);
+  const { t } = useTranslation();
   const { user } = useAuth();
   const sendSheetRef = useRef<SendSheetRef>(null);
 
@@ -41,7 +43,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
           androidName="arrow-down"
           onPress={async () => {
             await saveToLibraryAsync(picture);
-            Alert.alert("Picture saved!");
+            Alert.alert(t("camera.pictureSaved"));
           }}
         />
         <IconButton

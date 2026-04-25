@@ -13,6 +13,7 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 interface UsernameSetupProps {
   onComplete: () => void;
@@ -20,6 +21,7 @@ interface UsernameSetupProps {
 }
 
 export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps) {
+  const { t } = useTranslation();
   const theme = isDark ? Colors.dark : Colors.light;
   const { updateProfile } = useProfile();
   const [username, setUsername] = useState("");
@@ -62,10 +64,10 @@ export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps
         <View style={styles.inner}>
           <View style={styles.top}>
             <Text style={[styles.heading, { color: theme.text }]}>
-              Pick a username
+              {t("onboarding.pickUsername")}
             </Text>
             <Text style={[styles.subheading, { color: isDark ? "#555" : "#bbb" }]}>
-              This is how others will find you.{"\n"}You can change it later.
+              {t("onboarding.usernameHelper")}
             </Text>
           </View>
 
@@ -83,7 +85,7 @@ export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps
             <Text style={[styles.prefix, { color: isDark ? "#444" : "#bbb" }]}>@</Text>
             <TextInput
               style={[styles.input, { color: theme.text }]}
-              placeholder="your_username"
+              placeholder={t("onboarding.yourUsername")}
               placeholderTextColor={isDark ? "#3a3a3a" : "#c0c0c0"}
               value={username}
               onChangeText={(text) => {
@@ -106,7 +108,7 @@ export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps
             <Text style={styles.errorText}>{inputError}</Text>
           ) : (
             <Text style={[styles.helperText, { color: isDark ? "#3a3a3a" : "#c8c8c8" }]}>
-              Letters, numbers, and underscores only.
+              {t("onboarding.lettersNumbersUnderscores")}
             </Text>
           )}
         </View>
@@ -126,7 +128,7 @@ export default function UsernameSetup({ onComplete, isDark }: UsernameSetupProps
               <ActivityIndicator size="small" color="#000" />
             ) : (
               <Text style={[styles.buttonText, { color: isReady ? "#000" : isDark ? "#333" : "#bbb" }]}>
-                Continue
+                {t("onboarding.continue")}
               </Text>
             )}
           </TouchableOpacity>

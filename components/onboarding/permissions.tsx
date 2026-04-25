@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
 import { usePermissions } from "expo-media-library";
 import { useCameraPermissions, useMicrophonePermissions } from "expo-camera";
+import { useTranslation } from "react-i18next";
 
 interface PermissionTileProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -61,6 +62,7 @@ export default function PermissionsScreen({
   isDark,
   userEmail,
 }: PermissionsScreenProps) {
+  const { t } = useTranslation();
   const theme = isDark ? Colors.dark : Colors.light;
   const [cameraPermissions, requestCameraPermission] = useCameraPermissions();
   const [microphonePermissions, requestMicrophonePermission] = useMicrophonePermissions();
@@ -98,9 +100,9 @@ export default function PermissionsScreen({
       onComplete();
     } else {
       Alert.alert(
-        "Permissions Required",
+        t("onboarding.permissionsRequired"),
         "Please grant all permissions in your device settings to use this app.",
-        [{ text: "OK" }]
+        [{ text: t("common.ok") }]
       );
     }
   }
@@ -126,21 +128,21 @@ export default function PermissionsScreen({
         <View style={styles.tilesRow}>
           <PermissionTile
             icon="camera-outline"
-            label="Camera"
+            label={t("onboarding.camera")}
             granted={cameraPermissions?.granted}
             onRequest={requestCameraPermission}
             isDark={isDark}
           />
           <PermissionTile
             icon="mic-outline"
-            label="Microphone"
+            label={t("onboarding.microphone")}
             granted={microphonePermissions?.granted}
             onRequest={requestMicrophonePermission}
             isDark={isDark}
           />
           <PermissionTile
             icon="images-outline"
-            label="Photos"
+            label={t("onboarding.photos")}
             granted={mediaPermissions?.granted}
             onRequest={requestMediaPermission}
             isDark={isDark}

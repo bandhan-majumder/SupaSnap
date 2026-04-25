@@ -12,9 +12,11 @@ import AuthComponent from "@/components/auth/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useRef } from "react";
 import { Link } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function AuthScreen() {
   const [showAuth, setShowAuth] = useState(false);
+  const {t} = useTranslation();
 
   const splashOpacity = useRef(new Animated.Value(1)).current;
   const authOpacity = useRef(new Animated.Value(0)).current;
@@ -82,11 +84,10 @@ export default function AuthScreen() {
                 <View style={styles.splashBottom}>
                   <View style={styles.splashTextGroup}>
                     <Text style={styles.splashTitle}>
-                      Your journey{"\n"}starts here.
+                      {t("auth.yourJourneyStartsHere")}
                     </Text>
                     <Text style={styles.splashSubtitle}>
-                      Sign in or create an account to get{"\n"}everything
-                      personalised for you.
+                      {t("auth.signInOrCreate")}
                     </Text>
                   </View>
 
@@ -95,13 +96,13 @@ export default function AuthScreen() {
                     activeOpacity={0.85}
                     style={styles.ctaButton}
                   >
-                    <Text style={styles.ctaText}>Get Started</Text>
+                    <Text style={styles.ctaText}>{t("auth.getStarted")}</Text>
                   </TouchableOpacity>
 
                   <Text style={styles.splashFooter}>
-                    By continuing, you agree to our{" "}
+                    {t("auth.byContinuing")}{" "}
                     <Link href="/(others)/terms" style={styles.linkText}>
-                      Terms & Privacy Policy.
+                      {t("auth.termsPrivacy")}
                     </Link>
                   </Text>
                 </View>

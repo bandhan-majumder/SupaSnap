@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import MediaViewer from "@/components/chat-media-viewer";
 import { Colors } from "@/constants/theme";
@@ -161,6 +162,7 @@ const MessageItem = React.memo(
 );
 
 export default function ChatRoomScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
   const colorScheme = useColorScheme();
@@ -313,7 +315,7 @@ export default function ChatRoomScreen() {
                     color={theme.icon}
                   />
                   <Text style={[styles.emptyText, { color: theme.icon }]}>
-                    No messages yet
+                    {t("chat.noMessagesYet")}
                   </Text>
                 </View>
               }
@@ -335,7 +337,7 @@ export default function ChatRoomScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder="Type a message..."
+              placeholder={t("chat.typeMessage")}
               placeholderTextColor={theme.icon}
               value={messageText}
               onChangeText={setMessageText}

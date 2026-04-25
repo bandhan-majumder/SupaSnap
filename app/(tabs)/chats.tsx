@@ -31,8 +31,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 export default function ChatListScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuth();
   const colorScheme = useColorScheme();
@@ -64,7 +66,7 @@ export default function ChatListScreen() {
 
   const handleStartChat = async () => {
     if (!searchResult || searchResult.id === currentUserId) {
-      Alert.alert("Error", "Cannot start chat with yourself");
+      Alert.alert(t("common.error"), t("chats.cannotStartChatWithYourself"));
       return;
     }
 
@@ -73,7 +75,7 @@ export default function ChatListScreen() {
     if (conversationId) {
       router.push(`/chat/${conversationId}`);
     } else {
-      Alert.alert("Error", "Failed to start conversation");
+      Alert.alert(t("common.error"), t("chats.failedToStartConversation"));
     }
 
     setSearchUserName("");
@@ -143,7 +145,7 @@ export default function ChatListScreen() {
                 { color: theme.secondaryText, fontStyle: "italic" },
               ]}
             >
-              No messages yet
+              {t("chat.noMessagesYet")}
             </Text>
           )}
         </View>
@@ -159,7 +161,7 @@ export default function ChatListScreen() {
         color={theme.secondaryText}
       />
       <Text style={[styles.emptyTitle, { color: theme.text }]}>
-        No chats yet
+        {t("chats.noChatsYet")}
       </Text>
       <Text style={[styles.emptySubtitle, { color: theme.secondaryText }]}>
         Tap the icon above to start a conversation
