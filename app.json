@@ -49,30 +49,31 @@
         }
       ],
       [
-    "expo-media-library",
-    {
-      "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-      "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
-      "isAccessMediaLocationEnabled": true
-    }
-  ],
-  [
-    "expo-camera",
-    {
-      "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-      "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-      "recordAudioAndroid": true,
-       "barcodeScannerEnabled": true
-    }
-  ],
-  [
-    "expo-image-picker",
-    {
-      "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to update profile picture."
-    }
-  ],
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to update profile picture."
+        }
+      ],
       "expo-video",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
