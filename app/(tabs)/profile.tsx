@@ -184,18 +184,18 @@ export default function ProfileScreen() {
           ) : (
             <TouchableOpacity onPress={handleProfileInfo}>
               <Text style={[styles.email, { color: theme.tint }]}>
-                Set up Full Name
+                {t("profile.setUpFullName")}
               </Text>
             </TouchableOpacity>
           )}
           <Text style={[styles.tapHint, { color: theme.icon }]}>
-            Tap camera icon to change photo
+            {t("profile.tapCameraIconToChangePhoto")}
           </Text>
         </View>
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Account
+            {t("profile.account")}
           </Text>
 
           <TouchableOpacity
@@ -210,10 +210,10 @@ export default function ProfileScreen() {
             <Ionicons name="person-outline" size={22} color={theme.text} />
             <View style={styles.menuItemContent}>
               <Text style={[styles.menuItemTitle, { color: theme.text }]}>
-                Profile Info
+                {t("profile.profileInfo")}
               </Text>
               <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
-                View your account details
+                {t("profile.viewYourAccountDetails")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
@@ -230,10 +230,10 @@ export default function ProfileScreen() {
             <Ionicons name="settings-outline" size={22} color={theme.text} />
             <View style={styles.menuItemContent}>
               <Text style={[styles.menuItemTitle, { color: theme.text }]}>
-                Settings
+                {t("profile.settings")}
               </Text>
               <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
-                App preferences and options
+                {t("profile.appPreferencesAndOptions")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
@@ -257,7 +257,7 @@ export default function ProfileScreen() {
                 {t("profile.privacy")}
               </Text>
               <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
-                Control your privacy settings
+                {t("profile.controlYourPrivacySettings")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
@@ -266,7 +266,7 @@ export default function ProfileScreen() {
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Support
+            {t("profile.support")}
           </Text>
 
           <TouchableOpacity
@@ -280,10 +280,10 @@ export default function ProfileScreen() {
             <Ionicons name="help-circle-outline" size={22} color={theme.text} />
             <View style={styles.menuItemContent}>
               <Text style={[styles.menuItemTitle, { color: theme.text }]}>
-                Help Center
+                {t("profile.helpCenter")}
               </Text>
               <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
-                Get help and support
+                {t("profile.getHelpAndSupport")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
@@ -304,10 +304,10 @@ export default function ProfileScreen() {
             />
             <View style={styles.menuItemContent}>
               <Text style={[styles.menuItemTitle, { color: theme.text }]}>
-                About
+                {t("profile.about")}
               </Text>
               <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
-                App version 1.0.0
+                {t("profile.appVersion")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.icon} />
@@ -319,7 +319,7 @@ export default function ProfileScreen() {
           onPress={handleLogout}
         >
           <Ionicons name="log-out-outline" size={22} color="#f44336" />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>{t("profile.logout")}</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -334,11 +334,11 @@ export default function ProfileScreen() {
             style={[styles.modalContent, { backgroundColor: theme.background }]}
           >
             <Text style={[styles.modalTitle, { color: theme.text }]}>
-              Edit Profile
+              {t("profile.editProfile")}
             </Text>
 
             <Text style={[styles.inputLabel, { color: theme.text }]}>
-              Username
+              {t("profile.username")}
             </Text>
             <TextInput
               style={[
@@ -357,7 +357,7 @@ export default function ProfileScreen() {
             />
 
             <Text style={[styles.inputLabel, { color: theme.text }]}>
-              Full Name
+              {t("profile.fullName")}
             </Text>
             <TextInput
               style={[
@@ -386,7 +386,7 @@ export default function ProfileScreen() {
                 onPress={() => setEditModalVisible(false)}
               >
                 <Text style={[styles.modalButtonText, { color: theme.text }]}>
-                  Cancel
+                  {t("profile.cancel")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -398,7 +398,7 @@ export default function ProfileScreen() {
                   <ActivityIndicator size="small" color="#000" />
                 ) : (
                   <Text style={[styles.modalButtonText, { color: "#000" }]}>
-                    Save
+                    {t("profile.save")}
                   </Text>
                 )}
               </TouchableOpacity>

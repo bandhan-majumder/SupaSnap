@@ -41,11 +41,25 @@ export default function UserPickerSheet({
         ]}
       />
 
-      <TouchableOpacity onPress={handleSearch} style={styles.searchButton}>
+      <TouchableOpacity
+        disabled={searchUserName.length === 0}
+        onPress={handleSearch}
+        style={styles.searchButton}
+      >
         {searching ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.searchButtonText}>{t("chat.search")}</Text>
+          <View
+            style={{
+              display: "flex",
+              gap: 5,
+              flexDirection: "row", 
+              alignItems: "center",
+            }}
+          >
+            <Ionicons name="search" size={18} color="white" />
+            <Text style={styles.searchButtonText}>{t("chat.search")}</Text>
+          </View>
         )}
       </TouchableOpacity>
 
@@ -82,9 +96,11 @@ export default function UserPickerSheet({
                 @{searchResult.username}
               </Text>
             </View>
-            {!searchResult.id === currentUserId && <View style={[styles.chatBadge]}>
-              <Ionicons name="chatbubble" size={18} color="#fff" />
-            </View>}
+            {!searchResult.id === currentUserId && (
+              <View style={[styles.chatBadge]}>
+                <Ionicons name="chatbubble" size={18} color="#fff" />
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       )}
