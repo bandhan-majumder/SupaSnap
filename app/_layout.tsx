@@ -9,9 +9,9 @@ import "react-native-gesture-handler";
 import "react-native-reanimated";
 import "../i18next/i18next";
 import '../global.css'
-import 'react-native-gesture-handler'
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { AuthProvider } from "@/hooks/use-auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -25,37 +25,39 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(others)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="onboarding"
-              options={{
-                presentation: "fullScreenModal",
-                headerShown: false,
-                animation: "fade",
-              }}
-            />
-            <Stack.Screen
-              name="auth"
-              options={{
-                presentation: "fullScreenModal",
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="media-library"
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen name="chat" options={{ headerShown: false }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </AuthProvider>
+      <KeyboardProvider>
+        <AuthProvider>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="(others)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="onboarding"
+                options={{
+                  presentation: "fullScreenModal",
+                  headerShown: false,
+                  animation: "fade",
+                }}
+              />
+              <Stack.Screen
+                name="auth"
+                options={{
+                  presentation: "fullScreenModal",
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="media-library"
+                options={{ presentation: "modal" }}
+              />
+              <Stack.Screen name="chat" options={{ headerShown: false }} />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </AuthProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

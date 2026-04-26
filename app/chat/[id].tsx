@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 import MediaViewer from "@/components/chat-media-viewer";
 import { Colors } from "@/constants/theme";
@@ -22,6 +23,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMessages } from "@/hooks/use-chats";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Message } from "@/types/message";
+import { useCustomKeyboardAnimation } from "@/hooks/use-keyboard-animation";
 
 const MEDIA_SIZE = Dimensions.get("window").width * 0.6;
 const DEFAULT_BLURHASH = "L6PZfSi_.AyE_3t7t7R**0o#DgR4";
@@ -173,6 +175,13 @@ export default function ChatRoomScreen() {
   const [viewerType, setViewerType] = useState<"image" | "video">("image");
 
   const flatListRef = useRef<FlatList>(null);
+  const { height } = useCustomKeyboardAnimation();
+
+  const keyBoardPadding = useAnimatedStyle(() => {
+    return {
+      height: height.value
+    }
+  }, [])
 
   const otherUser = useMemo(() => {
     for (const m of messages) {
@@ -257,7 +266,7 @@ export default function ChatRoomScreen() {
     <>
       <SafeAreaView
         style={[styles.container, { backgroundColor: theme.background }]}
-        edges={["top", "bottom"]}
+        edges={["top"]}
       >
         <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: "#878484" }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -315,7 +324,7 @@ export default function ChatRoomScreen() {
           />
         )}
 
-        <View style={[styles.inputContainer, { backgroundColor: theme.background }]}>
+        <View style={[styles.inputContainer, { backgroundColor: 'transparent' }]}>
           <TextInput
             style={[
               styles.input,
@@ -342,6 +351,7 @@ export default function ChatRoomScreen() {
             )}
           </TouchableOpacity>
         </View>
+        <Animated.View style={keyBoardPadding} />
       </SafeAreaView>
 
       <MediaViewer
