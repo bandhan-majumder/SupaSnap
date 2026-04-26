@@ -221,7 +221,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 12,
     borderRadius: 14,
-    borderWidth: 1,
   },
 
   avatar: {
@@ -244,7 +243,7 @@ const styles = StyleSheet.create({
   },
 
   sendBtn: {
-    backgroundColor: "#1181a0",
+    backgroundColor: "#D8B38A",
     padding: 10,
     borderRadius: 20,
   },

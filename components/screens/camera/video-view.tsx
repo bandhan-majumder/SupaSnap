@@ -1,13 +1,15 @@
+import IconButton from "@/components/common/icon-button";
+import SendSheet, {
+  SendSheetRef,
+} from "@/components/screens/camera/send-sheet";
 import { useAuth } from "@/hooks/use-auth";
 import { Ionicons } from "@expo/vector-icons";
 import { saveToLibraryAsync } from "expo-media-library";
 import { shareAsync } from "expo-sharing";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useRef } from "react";
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import IconButton from "@/components/common/icon-button";
-import SendSheet, { SendSheetRef } from "@/components/screens/camera/send-sheet";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface VideoViewComponentProps {
   video: string;
@@ -94,6 +96,7 @@ export default function VideoViewComponent({
         nativeControls={false}
         player={player}
         style={{
+          marginTop: 20,
           width: "100%",
           height: "100%",
         }}
@@ -113,7 +116,7 @@ const styles = StyleSheet.create({
     bottom: 40,
     right: 20,
 
-    backgroundColor: "#1181a0",
+    backgroundColor: "#D8B38A",
     padding: 14,
     borderRadius: 30,
 

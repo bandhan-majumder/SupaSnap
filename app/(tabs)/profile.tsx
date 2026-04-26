@@ -254,7 +254,7 @@ export default function ProfileScreen() {
             />
             <View style={styles.menuItemContent}>
               <Text style={[styles.menuItemTitle, { color: theme.text }]}>
-                Privacy={t("profile.privacy")}
+                {t("profile.privacy")}
               </Text>
               <Text style={[styles.menuItemSubtitle, { color: theme.icon }]}>
                 Control your privacy settings

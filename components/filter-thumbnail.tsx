@@ -9,10 +9,8 @@ import { Image } from "expo-image";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const GRAYSCALE_MATRIX = [
-  0.299, 0.587, 0.114, 0, 0,
-  0.299, 0.587, 0.114, 0, 0,
-  0.299, 0.587, 0.114, 0, 0,
-  0,     0,     0,     1, 0,
+  0.299, 0.587, 0.114, 0, 0, 0.299, 0.587, 0.114, 0, 0, 0.299, 0.587, 0.114, 0,
+  0, 0, 0, 0, 1, 0,
 ];
 
 interface Props {
@@ -21,13 +19,14 @@ interface Props {
   onSelect: (filter: FilterPreset) => void;
 }
 
-function GrayscaleThumbnail() {
+function FilteredThumbnail({ filter }: { filter: FilterPreset }) {
   const image = useImage(require("@/assets/images/filter-preview.jpeg"));
   if (!image) return null;
+
   return (
     <Canvas style={StyleSheet.absoluteFill}>
       <SkiaImage image={image} x={0} y={0} width={50} height={50} fit="cover">
-        <ColorMatrix matrix={GRAYSCALE_MATRIX} />
+        {filter.isGrayscale && <ColorMatrix matrix={GRAYSCALE_MATRIX} />}
       </SkiaImage>
     </Canvas>
   );
@@ -42,7 +41,7 @@ export default function FilterThumbnail({
     <TouchableOpacity onPress={() => onSelect(filter)} style={styles.container}>
       <View style={[styles.preview, isSelected && styles.selectedRing]}>
         {filter.isGrayscale ? (
-          <GrayscaleThumbnail />
+          <FilteredThumbnail filter={filter} />
         ) : (
           <>
             <Image

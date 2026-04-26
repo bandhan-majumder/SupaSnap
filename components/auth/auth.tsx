@@ -150,7 +150,7 @@ export default function Auth() {
             activeOpacity={0.7}
           >
             <Text style={[styles.switchText, { color: theme.text }]}>
-              {isLogin ? t("auth.noAccount") : t("auth.hasAccount")}
+              {isLogin ? t("auth.noAccount") : t("auth.hasAccount")}{" "}
               <Text style={styles.switchBold}>
                 {isLogin ? t("auth.signUp") : t("auth.signIn")}
               </Text>

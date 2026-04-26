@@ -5,8 +5,8 @@ import { Image } from "expo-image";
 import { saveToLibraryAsync } from "expo-media-library";
 import { shareAsync } from "expo-sharing";
 import React, { useRef } from "react";
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import IconButton from "../../common/icon-button";
 import SendSheet, { SendSheetRef } from "./send-sheet";
 
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
 
   rowSendButton: {
-    backgroundColor: "#1181a0",
+    backgroundColor: "#D8B38A",
     padding: 10,
     borderRadius: 20,
 
