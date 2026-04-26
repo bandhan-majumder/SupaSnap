@@ -26,7 +26,7 @@ export default function ButtonRowTools({
               fontWeight: cameraMode === "picture" ? "bold" : "100",
             }}
           >
-            SupaSnap
+            snap
           </ThemedText>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setCameraMode("video")}>

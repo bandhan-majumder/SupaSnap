@@ -4,6 +4,7 @@ import MainRowAction from "@/components/screens/camera/main-row-actionts";
 import PictureView from "@/components/screens/camera/picture-view";
 import QRCodeButton from "@/components/screens/camera/qr-code-button";
 import VideoViewComponent from "@/components/screens/camera/video-view";
+import { FILTER_PRESETS, FilterPreset } from "@/constants/filters";
 import {
   BarcodeScanningResult,
   CameraMode,
@@ -12,7 +13,7 @@ import {
 } from "expo-camera";
 import * as WebBrowser from "expo-web-browser";
 import React from "react";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
@@ -30,6 +31,9 @@ export default function HomeScreen() {
   const [picture, setPicture] = React.useState<string>("");
   const [video, setVideo] = React.useState<string>("");
   const [isRecording, setIsRecording] = React.useState<boolean>(false);
+  const [selectedFilter, setSelectedFilter] = React.useState<FilterPreset>(
+    FILTER_PRESETS[0],
+  );
 
   async function handleTakePicture() {
     const response = await cameraRef.current?.takePictureAsync({
@@ -75,7 +79,7 @@ export default function HomeScreen() {
   }
 
   if (isBrowser) return <></>;
-  if (picture) return <PictureView picture={picture} setPicture={setPicture} />;
+  if (picture) return <PictureView picture={picture} setPicture={setPicture} activeFilter={selectedFilter} />;
   if (video) return <VideoViewComponent video={video} setVideo={setVideo} />;
 
   return (
@@ -115,6 +119,8 @@ export default function HomeScreen() {
                 cameraMode === "picture" ? handleTakePicture : toggleRecord
               }
               isRecording={isRecording}
+              selectedFilter={selectedFilter}
+              onSelectFilter={setSelectedFilter}
             />
             <ButtonRowTools
               setCameraMode={setCameraMode}
@@ -122,6 +128,18 @@ export default function HomeScreen() {
             />
           </View>
         </SafeAreaView>
+        {selectedFilter.overlayOpacity > 0 && (
+          <View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: selectedFilter.overlayColor,
+                opacity: selectedFilter.overlayOpacity,
+              },
+            ]}
+          />
+        )}
       </CameraView>
     </View>
   );

@@ -1,3 +1,4 @@
+import { FilterPreset } from "@/constants/filters";
 import { useAuth } from "@/hooks/use-auth";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -12,17 +13,19 @@ import SendSheet, { SendSheetRef } from "./send-sheet";
 interface PictureViewProps {
   picture: string;
   setPicture: React.Dispatch<React.SetStateAction<string>>;
+  activeFilter: FilterPreset;
 }
 
-export default function PictureView({ picture, setPicture }: PictureViewProps) {
-  console.log("picture is: ", picture);
+export default function PictureView({
+  picture,
+  setPicture,
+  activeFilter,
+}: PictureViewProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const sendSheetRef = useRef<SendSheetRef>(null);
 
-  if (!user?.id) {
-    return;
-  }
+  if (!user?.id) return null;
 
   const handleSendPress = () => {
     if (user?.id) {
@@ -57,11 +60,25 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
         />
       </View>
 
-      <Image
-        source={{ uri: picture }}
-        style={StyleSheet.absoluteFillObject}
-        contentFit="cover"
-      />
+      <View style={StyleSheet.absoluteFillObject}>
+        <Image
+          source={{ uri: picture }}
+          style={StyleSheet.absoluteFillObject}
+          contentFit="cover"
+        />
+        {activeFilter?.overlayOpacity > 0 && (
+          <View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                backgroundColor: activeFilter.overlayColor,
+                opacity: activeFilter.overlayOpacity,
+              },
+            ]}
+          />
+        )}
+      </View>
 
       <TouchableOpacity style={styles.sendButton} onPress={handleSendPress}>
         <Ionicons name="send" size={20} color="#fff" />

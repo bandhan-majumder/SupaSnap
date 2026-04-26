@@ -3,7 +3,6 @@ import { CameraMode } from "expo-camera";
 import { SymbolView } from "expo-symbols";
 import { Ionicons } from "@expo/vector-icons";
 import {
-  Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -12,29 +11,34 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { Image } from "expo-image";
-import { Asset, getAlbumsAsync, getAssetsAsync } from "expo-media-library";
+import { Asset, getAssetsAsync } from "expo-media-library";
+import FilterThumbnail from "@/components/filter-thumbnail";
+import { FILTER_PRESETS, FilterPreset } from "@/constants/filters";
+import React from "react";
 
 interface MainRowActionProps {
   handleTakePicture: () => void;
   cameraMode: CameraMode;
   isRecording: boolean;
+  selectedFilter: FilterPreset;
+  onSelectFilter: (f: FilterPreset) => void;
 }
 
 export default function MainRowAction({
   cameraMode,
   handleTakePicture,
   isRecording,
+  selectedFilter,
+  onSelectFilter,
 }: MainRowActionProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
 
   useEffect(() => {
     getAlbums();
-  }, [])
+  }, []);
 
   async function getAlbums() {
-    const fetchAlbumns = await getAlbumsAsync();
     const albumAsset = await getAssetsAsync({
-     // album: fetchAlbumns[0],
       mediaType: "photo",
       sortBy: "creationTime",
       first: 4,
@@ -51,74 +55,69 @@ export default function MainRowAction({
 
   return (
     <View style={styles.container}>
-      <FlatList
-      inverted
-        data={assets}
-        renderItem={({ item }) => (
-          <Image
-            key={item.id}
-            source={{uri: item.uri}}
-            style={{
-              width: 50,
-              height: 50,
-              borderRadius: 5,
-            }}
-          />
-        )}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{gap: 6}}
-      />
-      <TouchableOpacity onPress={handleTakePicture}>
-        <SymbolView
-          name={
-            cameraMode === "picture"
-              ? "circle"
-              : isRecording
-                ? "record.circle"
-                : "circle.circle"
-          }
-          size={90}
-          type="hierarchical"
-          tintColor={isRecording ? Colors.light.supaPrimary : "white"}
-          animationSpec={{
-            effect: {
-              type: isRecording ? "pulse" : "bounce",
-            },
-            repeating: isRecording,
-          }}
-          fallback={
-            <Ionicons
-              name={androidIconName}
-              size={90}
-              color={isRecording ? Colors.light.supaPrimary : "white"}
+      <View style={styles.side}>
+        <FlatList
+          inverted
+          data={assets}
+          renderItem={({ item }) => (
+            <Image
+              key={item.id}
+              source={{ uri: item.uri }}
+              style={styles.galleryImage}
             />
-          }
+          )}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.galleryContent}
         />
-      </TouchableOpacity>
-      <ScrollView
-        horizontal
-        contentContainerStyle={{ gap: 2 }}
-        showsHorizontalScrollIndicator={false}
-      >
-        {[0, 1, 2, 3].map((item) => (
+      </View>
+
+      <View style={styles.shutterWrapper}>
+        <TouchableOpacity onPress={handleTakePicture}>
           <SymbolView
-            key={item}
-            name="face.dashed"
-            size={50}
+            name={
+              cameraMode === "picture"
+                ? "circle"
+                : isRecording
+                  ? "record.circle"
+                  : "circle.circle"
+            }
+            size={90}
             type="hierarchical"
-            tintColor={"white"}
+            tintColor={isRecording ? Colors.light.supaPrimary : "white"}
+            animationSpec={{
+              effect: {
+                type: isRecording ? "pulse" : "bounce",
+              },
+              repeating: isRecording,
+            }}
             fallback={
               <Ionicons
-                color={"white"}
-                size={50}
-                key={item}
-                name="person-circle-outline"
+                name={androidIconName}
+                size={90}
+                color={isRecording ? Colors.light.supaPrimary : "white"}
               />
             }
           />
-        ))}
-      </ScrollView>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.side}>
+        <ScrollView
+          horizontal
+          contentContainerStyle={styles.filtersContent}
+          showsHorizontalScrollIndicator={false}
+        >
+          {FILTER_PRESETS.map((filter) => (
+            <FilterThumbnail
+              key={filter.id}
+              filter={filter}
+              isSelected={selectedFilter.id === filter.id}
+              onSelect={onSelectFilter}
+            />
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -128,9 +127,31 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     position: "absolute",
-    height: 100,
     bottom: 45,
+  },
+  side: {
+    flex: 1,
+    alignSelf: "center",
+  },
+  shutterWrapper: {
+    width: 90,
+    alignItems: "center",
+    alignSelf: "center",
+  },
+  galleryImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 5,
+  },
+  galleryContent: {
+    gap: 6,
+    paddingHorizontal: 8,
+    alignItems: "center",
+  },
+  filtersContent: {
+    gap: 8,
+    paddingHorizontal: 8,
+    alignItems: "center",
   },
 });
