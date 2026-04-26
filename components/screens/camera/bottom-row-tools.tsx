@@ -5,7 +5,7 @@ import IconButton from "../../common/icon-button";
 import { ThemedText } from "../../themed-text";
 
 interface BottomRowToolsProp {
-  setCameraMode: React.Dispatch<React.SetStateAction<CameraMode>>;
+  setCameraMode: (mode: CameraMode) => void, // React.Dispatch<React.SetStateAction<CameraMode>>;
   cameraMode: CameraMode;
 }
 
@@ -35,7 +35,7 @@ export default function ButtonRowTools({
               fontWeight: cameraMode === "video" ? "bold" : "100",
             }}
           >
-            Video
+            record
           </ThemedText>
         </TouchableOpacity>
       </View>

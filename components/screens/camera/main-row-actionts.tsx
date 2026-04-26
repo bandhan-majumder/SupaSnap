@@ -37,6 +37,17 @@ export default function MainRowAction({
     getAlbums();
   }, []);
 
+  // Reset visual recording state immediately when mode changes
+  const [localRecording, setLocalRecording] = useState(false);
+
+  useEffect(() => {
+    setLocalRecording(isRecording);
+  }, [isRecording]);
+
+  useEffect(() => {
+    setLocalRecording(false);
+  }, [cameraMode]);
+
   async function getAlbums() {
     const albumAsset = await getAssetsAsync({
       mediaType: "photo",
@@ -49,9 +60,9 @@ export default function MainRowAction({
   const androidIconName: React.ComponentProps<typeof Ionicons>["name"] =
     cameraMode === "picture"
       ? "radio-button-off"
-      : isRecording
-        ? "radio-button-on"
-        : "ellipse-outline";
+      : localRecording
+      ? "radio-button-on"
+      : "ellipse-outline";
 
   return (
     <View style={styles.container}>
@@ -71,37 +82,35 @@ export default function MainRowAction({
           contentContainerStyle={styles.galleryContent}
         />
       </View>
-
       <View style={styles.shutterWrapper}>
         <TouchableOpacity onPress={handleTakePicture}>
           <SymbolView
             name={
               cameraMode === "picture"
                 ? "circle"
-                : isRecording
-                  ? "record.circle"
-                  : "circle.circle"
+                : localRecording
+                ? "record.circle"
+                : "circle.circle"
             }
             size={90}
             type="hierarchical"
-            tintColor={isRecording ? Colors.light.supaPrimary : "white"}
+            tintColor={localRecording ? Colors.light.supaPrimary : "white"}
             animationSpec={{
               effect: {
-                type: isRecording ? "pulse" : "bounce",
+                type: localRecording ? "pulse" : "bounce",
               },
-              repeating: isRecording,
+              repeating: localRecording,
             }}
             fallback={
               <Ionicons
                 name={androidIconName}
                 size={90}
-                color={isRecording ? Colors.light.supaPrimary : "white"}
+                color={localRecording ? Colors.light.supaPrimary : "white"}
               />
             }
           />
         </TouchableOpacity>
       </View>
-
       <View style={styles.side}>
         <ScrollView
           horizontal

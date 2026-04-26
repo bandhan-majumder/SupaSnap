@@ -15,6 +15,8 @@ import * as WebBrowser from "expo-web-browser";
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { GestureDetector } from "react-native-gesture-handler";
+import { usePinchZoom } from "@/hooks/use-pinch-zoom";
 
 export default function HomeScreen() {
   const cameraRef = React.useRef<CameraView>(null);
@@ -25,34 +27,34 @@ export default function HomeScreen() {
   const [cameraZoom, setCameraZoom] = React.useState<number>(0);
   const [enableTorch, setEnableTorch] = React.useState<boolean>(false);
   const [enableFlash, setEnableFlash] = React.useState<FlashMode>("off");
-  const [cameraFacing, setCameraFacing] = React.useState<"front" | "back">(
-    "back",
-  );
+  const [cameraFacing, setCameraFacing] = React.useState<"front" | "back">("back");
   const [picture, setPicture] = React.useState<string>("");
   const [video, setVideo] = React.useState<string>("");
   const [isRecording, setIsRecording] = React.useState<boolean>(false);
-  const [selectedFilter, setSelectedFilter] = React.useState<FilterPreset>(
-    FILTER_PRESETS[0],
-  );
+  const [selectedFilter, setSelectedFilter] = React.useState<FilterPreset>(FILTER_PRESETS[0]);
+
+  const pinchGesture = usePinchZoom(cameraZoom, setCameraZoom);
 
   async function handleTakePicture() {
-    const response = await cameraRef.current?.takePictureAsync({
-      // quality: 1,
-    });
+    const response = await cameraRef.current?.takePictureAsync({});
     setPicture(response!.uri);
   }
 
-  async function toggleRecord() {
+  const toggleRecord = React.useCallback(async () => {
     if (isRecording) {
       cameraRef.current?.stopRecording();
       setIsRecording(false);
     } else {
       setIsRecording(true);
-      const response = await cameraRef.current?.recordAsync({
-        // maxDuration: 10000
-      });
+      const response = await cameraRef.current?.recordAsync({});
       setVideo(response!.uri);
     }
+  }, [isRecording]);
+
+  // Reset recording state when switching modes
+  function handleSetCameraMode(mode: CameraMode) {
+    setIsRecording(false);
+    setCameraMode(mode);
   }
 
   function handleBarCodeScanned(scanningResult: BarcodeScanningResult) {
@@ -62,7 +64,6 @@ export default function HomeScreen() {
     if (timeOutRef.current) {
       clearTimeout(timeOutRef.current);
     }
-
     timeOutRef.current = setTimeout(() => {
       setQrCodeDetected("");
     }, 500);
@@ -83,64 +84,59 @@ export default function HomeScreen() {
   if (video) return <VideoViewComponent video={video} setVideo={setVideo} />;
 
   return (
-    // HomeScreen
-    <View style={{ flex: 1 }}>
-      <CameraView
-        ref={cameraRef}
-        style={{ flex: 1 }}
-        mode={cameraMode}
-        barcodeScannerSettings={{
-          barcodeTypes: ["qr"],
-        }}
-        zoom={cameraZoom}
-        flash={enableFlash}
-        enableTorch={enableTorch}
-        facing={cameraFacing}
-        onBarcodeScanned={handleBarCodeScanned}
-      >
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={{ flex: 1 }}>
-            {qrCodeDetected ? (
-              <QRCodeButton handleOpenQRCode={handleOpenQrCode} />
-            ) : null}
-            <CameraTools
-              cameraFacing={cameraFacing}
-              cameraZoom={cameraZoom}
-              enableFlash={enableFlash}
-              enableTorch={enableTorch}
-              setEnableTorch={setEnableTorch}
-              setEnableFlash={setEnableFlash}
-              setCameraFacing={setCameraFacing}
-              setCameraZoom={setCameraZoom}
+    <GestureDetector gesture={pinchGesture}>
+      <View style={{ flex: 1 }}>
+        <CameraView
+          ref={cameraRef}
+          style={{ flex: 1 }}
+          mode={cameraMode}
+          barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+          zoom={cameraZoom}
+          flash={enableFlash}
+          enableTorch={enableTorch}
+          facing={cameraFacing}
+          onBarcodeScanned={handleBarCodeScanned}
+        >
+          <SafeAreaView style={{ flex: 1 }}>
+            <View style={{ flex: 1 }}>
+              {qrCodeDetected ? (
+                <QRCodeButton handleOpenQRCode={handleOpenQrCode} />
+              ) : null}
+              <CameraTools
+                cameraFacing={cameraFacing}
+                enableFlash={enableFlash}
+                enableTorch={enableTorch}
+                setEnableTorch={setEnableTorch}
+                setEnableFlash={setEnableFlash}
+                setCameraFacing={setCameraFacing}
+              />
+              <MainRowAction
+                cameraMode={cameraMode}
+                handleTakePicture={cameraMode === "picture" ? handleTakePicture : toggleRecord}
+                isRecording={isRecording}
+                selectedFilter={selectedFilter}
+                onSelectFilter={setSelectedFilter}
+              />
+              <ButtonRowTools
+                setCameraMode={handleSetCameraMode}
+                cameraMode={cameraMode}
+              />
+            </View>
+          </SafeAreaView>
+          {selectedFilter.overlayOpacity > 0 && (
+            <View
+              pointerEvents="none"
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor: selectedFilter.overlayColor,
+                  opacity: selectedFilter.overlayOpacity,
+                },
+              ]}
             />
-            <MainRowAction
-              cameraMode={cameraMode}
-              handleTakePicture={
-                cameraMode === "picture" ? handleTakePicture : toggleRecord
-              }
-              isRecording={isRecording}
-              selectedFilter={selectedFilter}
-              onSelectFilter={setSelectedFilter}
-            />
-            <ButtonRowTools
-              setCameraMode={setCameraMode}
-              cameraMode={cameraMode}
-            />
-          </View>
-        </SafeAreaView>
-        {selectedFilter.overlayOpacity > 0 && (
-          <View
-            pointerEvents="none"
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                backgroundColor: selectedFilter.overlayColor,
-                opacity: selectedFilter.overlayOpacity,
-              },
-            ]}
-          />
-        )}
-      </CameraView>
-    </View>
+          )}
+        </CameraView>
+      </View>
+    </GestureDetector>
   );
 }
