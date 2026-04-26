@@ -17,6 +17,14 @@
   <img src="assets/screens/permission.png" width="30%" style="margin: 0 4px;" />
 </div>
 
+### Tabs
+
+<div align="center">
+  <img src="assets/screens/camera.png" width="30%" style="margin: 0 4px;" />
+  <img src="assets/screens/record.png" width="30%" style="margin: 0 4px;" />
+   <img src="assets/screens/preview.png" width="30%" style="margin: 0 4px;" />
+   <img src="assets/screens/share-snap.png" width="30%" style="margin: 0 4px;" />
+</div>
 
 ### Chat screen
 
@@ -25,6 +33,13 @@
   <img src="assets/screens/chat-keyboard.png" width="30%" style="margin: 0 4px;" />
   <img src="assets/screens/chat-list.png" width="30%" style="margin: 0 4px;" />
   <img src="assets/screens/chat-search.png" width="30%" style="margin: 0 4px;" />
+</div>
+
+### Profile screen
+
+<div align="center">
+  <img src="assets/screens/profile.png" width="30%" style="margin: 0 4px;" />
+  <img src="assets/screens/profile-file-upload.png" width="30%" style="margin: 0 4px;" />
 </div>
 
 ## Get started
