@@ -59,7 +59,7 @@ export default function TabLayout() {
             style={{
               flex: 1,
               backgroundColor: theme.background,
-              borderRadius: 30,
+              borderRadius: 5,
               overflow: "hidden",
               elevation: 0, 
               shadowOpacity: 0,

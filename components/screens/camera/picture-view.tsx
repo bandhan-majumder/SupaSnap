@@ -13,7 +13,7 @@ import SendSheet, { SendSheetRef } from "./send-sheet";
 interface PictureViewProps {
   picture: string;
   setPicture: React.Dispatch<React.SetStateAction<string>>;
-  activeFilter: FilterPreset;
+  activeFilter?: FilterPreset;
 }
 
 export default function PictureView({
@@ -66,7 +66,7 @@ export default function PictureView({
           style={StyleSheet.absoluteFillObject}
           contentFit="cover"
         />
-        {activeFilter?.overlayOpacity > 0 && (
+        {activeFilter && activeFilter.overlayOpacity > 0 && (
           <View
             pointerEvents="none"
             style={[
