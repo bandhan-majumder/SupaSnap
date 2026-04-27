@@ -60,9 +60,7 @@ export default function MainRowAction({
   const androidIconName: React.ComponentProps<typeof Ionicons>["name"] =
     cameraMode === "picture"
       ? "radio-button-off"
-      : localRecording
-      ? "radio-button-on"
-      : "ellipse-outline";
+      : "radio-button-on"
 
   return (
     <View style={styles.container}>
@@ -105,7 +103,7 @@ export default function MainRowAction({
               <Ionicons
                 name={androidIconName}
                 size={90}
-                color={localRecording ? Colors.light.supaPrimary : "white"}
+                color={localRecording ? '#C6011F' : "white"}
               />
             }
           />

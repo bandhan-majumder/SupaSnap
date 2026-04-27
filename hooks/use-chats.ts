@@ -9,7 +9,6 @@ import {
   createRoom,
   fetchAllProfiles,
   fetchLastMessageForRoom,
-  fetchMessageById,
   fetchMessages,
   fetchProfileByUsername,
   fetchRoomsForUser,
@@ -124,12 +123,14 @@ export function useProfiles() {
   };
 }
 
-export function useMessages(roomId: string | null) {
-  const { user } = useAuth();
+export function useMessages(roomId: string | null, userId: string | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const [allConnectedUsers, setAllConnectedUsers] = useState<number>(1); // user itself is always connected. So if the total number is 2, that means the other person is also online
+
+  if(!userId) throw new Error("User Id is required");
 
   const loadMessages = useCallback(async () => {
     if (!roomId) return;
@@ -150,43 +151,70 @@ export function useMessages(roomId: string | null) {
   useEffect(() => {
     if (!roomId) return;
 
-    const channel = supabase
-      .channel(`messages:${roomId}:${Date.now()}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `room_id=eq.${roomId}`,
-        },
-        async (payload) => {
-          const newMsg = await fetchMessageById(payload.new.id);
-          if (!newMsg) return;
+    let cancelled = false;
+    const channelName = `room:${roomId}:messages`;
 
-          setMessages((prev) => {
-            const withoutOptimistic = prev.filter(
-              (m) =>
-                !m.id.startsWith("optimistic-") ||
-                m.content !== newMsg.content,
-            );
-            if (withoutOptimistic.some((m) => m.id === newMsg.id))
-              return withoutOptimistic;
-            return [...withoutOptimistic, newMsg];
-          });
-        },
-      )
-      .subscribe();
+    const setup = async () => {
 
-    channelRef.current = channel;
+      if (cancelled) return;
+
+      // await supabase.realtime.setAuth();
+
+      const newChannel = supabase.channel(channelName, {
+        config: {
+          private: false, // FIXME: should be private
+          presence: {
+            key: userId,
+          },
+          broadcast: {
+            ack: false,
+            self: false,
+          },
+        },
+      });
+
+      newChannel
+        .on("presence", { event: "sync" }, () => {
+          setAllConnectedUsers(Object.keys(newChannel.presenceState()).length);
+        })
+        .on("broadcast", { event: "new_message" }, (payload) => {
+          const record = payload.payload;
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: record.id,
+              content: record.content,
+              created_at: record.created_at,
+              deleted_at: record.deleted_at,
+              expires_at: record.expires_at,
+              room_id: record.room_id,
+              seen_at: record.seen_at,
+              sender_id: record.sender_id,
+              type: record.type,
+              updated_at: record.updated_at,
+              media_type: record.media_type,
+            },
+          ]);
+        })
+        .subscribe((status, err) => {
+          if (status !== "SUBSCRIBED") return;
+          newChannel.track({ userId: userId });
+        });
+
+      channelRef.current = newChannel;
+    };
+
+    setup();
 
     return () => {
+      cancelled = true;
       if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
+        channelRef.current.untrack();
+        channelRef.current.unsubscribe();
         channelRef.current = null;
       }
     };
-  }, [roomId]);
+  }, [roomId, userId]);
 
   const sendMessage = useCallback(
     async (
@@ -194,28 +222,11 @@ export function useMessages(roomId: string | null) {
       type: "text" | "media" = "text",
       mediaType?: "video" | "image",
     ): Promise<boolean> => {
-      if (!roomId || !content.trim() || !user) return false;
-
-      const optimisticMsg: Message = {
-        id: `optimistic-${Date.now()}`,
-        room_id: roomId,
-        sender_id: user.id,
-        type,
-        media_type: mediaType,
-        content: content.trim(),
-        seen_at: null,
-        expires_at: null,
-        deleted_at: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, optimisticMsg]);
-
+      if (!roomId || !content.trim() || !userId) return false;
       try {
         await insertMessage({
           room_id: roomId,
-          sender_id: user.id,
+          sender_id: userId,
           type,
           content: content.trim(),
           media_type: mediaType,
@@ -223,15 +234,15 @@ export function useMessages(roomId: string | null) {
         await touchRoom(roomId);
         return true;
       } catch (e) {
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
         setError(e as Error);
         return false;
       }
     },
-    [roomId, user],
+    [roomId, userId],
   );
 
   return {
+    isOtherUserOnline: allConnectedUsers > 1,
     messages,
     loading,
     error,

@@ -4,10 +4,7 @@ import AppBottomSheet, {
 import UserPickerSheet from "@/components/screens/chats/user-picker-sheet";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  useConversations,
-  useProfiles,
-} from "@/hooks/use-chats";
+import { useConversations, useProfiles } from "@/hooks/use-chats";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   formatTime,
@@ -19,7 +16,7 @@ import { Profile } from "@/types/profile";
 import { ChatRoom } from "@/types/room";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -32,6 +29,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { useFocusEffect } from "expo-router";
 
 export default function ChatListScreen() {
   const { t } = useTranslation();
@@ -46,7 +44,14 @@ export default function ChatListScreen() {
     conversations,
     loading: convLoading,
     startConversation,
+    refetch,
   } = useConversations();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const { loading: profilesLoading, searchByUsername } = useProfiles();
 
@@ -120,8 +125,10 @@ export default function ChatListScreen() {
             </Text>
             {item.last_message && (
               <Text style={[styles.timeText, { color: theme.secondaryText }]}>
-                {//@ts-ignore
-                formatTime(item.last_message.created_at)}
+                {
+                  //@ts-ignore
+                  formatTime(item.last_message.created_at)
+                }
               </Text>
             )}
           </View>
@@ -268,7 +275,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 14,
     borderRadius: 14,
-    borderWidth: 1,
     alignItems: "center",
   },
 

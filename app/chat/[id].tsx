@@ -29,7 +29,15 @@ const MEDIA_SIZE = Dimensions.get("window").width * 0.6;
 const DEFAULT_BLURHASH = "L6PZfSi_.AyE_3t7t7R**0o#DgR4";
 
 const ImageMessage = React.memo(
-  ({ uri, blurhash, onPress }: { uri: string; blurhash?: string; onPress: () => void }) => (
+  ({
+    uri,
+    blurhash,
+    onPress,
+  }: {
+    uri: string;
+    blurhash?: string;
+    onPress: () => void;
+  }) => (
     <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
       <Image
         source={{ uri }}
@@ -44,7 +52,15 @@ const ImageMessage = React.memo(
 );
 
 const VideoMessage = React.memo(
-  ({ uri, blurhash, onPress }: { uri: string; blurhash?: string; onPress: () => void }) => {
+  ({
+    uri,
+    blurhash,
+    onPress,
+  }: {
+    uri: string;
+    blurhash?: string;
+    onPress: () => void;
+  }) => {
     const player = useVideoPlayer(uri, (p) => {
       p.muted = true;
       p.loop = false;
@@ -102,13 +118,22 @@ const MessageItem = React.memo(
             </Text>
           </View>
         )}
-        <View style={[styles.messageContainer, isOwn && styles.ownMessageContainer]}>
+        <View
+          style={[styles.messageContainer, isOwn && styles.ownMessageContainer]}
+        >
           <View
             style={[
               styles.messageBubble,
               isOwn
-                ? { backgroundColor: theme.supaPrimary, borderBottomRightRadius: 4 }
-                : { backgroundColor: colorScheme === "dark" ? "#2a2a2a" : "#e5e5e5", borderBottomLeftRadius: 4 },
+                ? {
+                    backgroundColor: theme.supaPrimary,
+                    borderBottomRightRadius: 4,
+                  }
+                : {
+                    backgroundColor:
+                      colorScheme === "dark" ? "#2a2a2a" : "#e5e5e5",
+                    borderBottomLeftRadius: 4,
+                  },
               isMedia && styles.mediaBubble,
             ]}
           >
@@ -142,10 +167,20 @@ const MessageItem = React.memo(
             )}
             {!isMedia && (
               <>
-                <Text style={[styles.messageText, { color: isOwn ? "#000" : theme.text }]}>
+                <Text
+                  style={[
+                    styles.messageText,
+                    { color: isOwn ? "#000" : theme.text },
+                  ]}
+                >
                   {item.content}
                 </Text>
-                <Text style={[styles.timeText, { color: isOwn ? "rgba(0,0,0,0.5)" : theme.icon }]}>
+                <Text
+                  style={[
+                    styles.timeText,
+                    { color: isOwn ? "rgba(0,0,0,0.5)" : theme.icon },
+                  ]}
+                >
                   {formatTime(item.created_at)}
                 </Text>
               </>
@@ -166,7 +201,9 @@ export default function ChatRoomScreen() {
   const router = useRouter();
 
   const currentUserId = user?.id;
-  const { messages, loading, sendMessage } = useMessages(id || null);
+  const { messages, loading, sendMessage, isOtherUserOnline } = useMessages(
+    id || null, user?.id || null
+  );
 
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
@@ -179,9 +216,9 @@ export default function ChatRoomScreen() {
 
   const keyBoardPadding = useAnimatedStyle(() => {
     return {
-      height: height.value
-    }
-  }, [])
+      height: height.value,
+    };
+  }, []);
 
   const otherUser = useMemo(() => {
     for (const m of messages) {
@@ -194,11 +231,14 @@ export default function ChatRoomScreen() {
     return null;
   }, [messages, currentUserId]);
 
-  const handleMediaPress = useCallback((uri: string, type: "image" | "video") => {
-    setViewerUri(uri);
-    setViewerType(type);
-    setViewerVisible(true);
-  }, []);
+  const handleMediaPress = useCallback(
+    (uri: string, type: "image" | "video") => {
+      setViewerUri(uri);
+      setViewerType(type);
+      setViewerVisible(true);
+    },
+    [],
+  );
 
   const handleSend = async () => {
     if (!messageText.trim() || sending) return;
@@ -268,8 +308,16 @@ export default function ChatRoomScreen() {
         style={[styles.container, { backgroundColor: theme.background }]}
         edges={["top"]}
       >
-        <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: "#878484" }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: theme.background, borderBottomColor: "#878484" },
+          ]}
+        >
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
             <Ionicons name="chevron-back" size={28} color={theme.text} />
           </TouchableOpacity>
 
@@ -290,6 +338,12 @@ export default function ChatRoomScreen() {
               numberOfLines={1}
             >
               {otherUser?.username ?? ""}
+            </Text>
+            <Text
+              style={[styles.status, { color: isOtherUserOnline ? 'green' : 'gray' }]}
+              numberOfLines={1}
+            >
+              {isOtherUserOnline ? "(online)" : "(offline)"}
             </Text>
           </View>
           <View style={styles.backButton} />
@@ -315,7 +369,11 @@ export default function ChatRoomScreen() {
             automaticallyAdjustKeyboardInsets={true}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Ionicons name="chatbubbles-outline" size={64} color={theme.icon} />
+                <Ionicons
+                  name="chatbubbles-outline"
+                  size={64}
+                  color={theme.icon}
+                />
                 <Text style={[styles.emptyText, { color: theme.icon }]}>
                   {t("chat.noMessagesYet")}
                 </Text>
@@ -324,7 +382,9 @@ export default function ChatRoomScreen() {
           />
         )}
 
-        <View style={[styles.inputContainer, { backgroundColor: 'transparent' }]}>
+        <View
+          style={[styles.inputContainer, { backgroundColor: "transparent" }]}
+        >
           <TextInput
             style={[
               styles.input,
@@ -403,7 +463,13 @@ const styles = StyleSheet.create({
     maxWidth: "70%",
   },
 
-  messagesList: { padding: 16, flexGrow: 1, flexDirection: 'column-reverse' },
+  status: {
+    fontSize: 12,
+    fontWeight: "400",
+    maxWidth: "70%",
+  },
+
+  messagesList: { padding: 16, flexGrow: 1, flexDirection: "column-reverse" },
 
   emptyContainer: { alignItems: "center", marginTop: 100 },
 

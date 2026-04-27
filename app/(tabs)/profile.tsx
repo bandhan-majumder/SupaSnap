@@ -20,6 +20,8 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useCustomKeyboardAnimation } from "@/hooks/use-keyboard-animation";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -43,6 +45,13 @@ export default function ProfileScreen() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editUsername, setEditUsername] = useState("");
   const [editFullName, setEditFullName] = useState("");
+  const { height } = useCustomKeyboardAnimation();
+
+  const keyBoardPadding = useAnimatedStyle(() => {
+    return {
+      height: height.value,
+    };
+  }, []);
 
   const openEditModal = () => {
     setEditUsername(profile?.username || "");
@@ -403,6 +412,7 @@ export default function ProfileScreen() {
                 )}
               </TouchableOpacity>
             </View>
+            <Animated.View style={keyBoardPadding} />
           </View>
         </View>
       </Modal>

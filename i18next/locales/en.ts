@@ -11,6 +11,7 @@ const en = {
       success: "Success",
     },
     auth: {
+      success: "Successfully signed up!",
       yourJourneyStartsHere: "Your journey\nstarts here.",
       signInOrCreate: "Sign in or create an account to get\neverything personalised for you.",
       getStarted: "Get Started",

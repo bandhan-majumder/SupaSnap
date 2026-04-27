@@ -50,7 +50,7 @@ export default function RootLayout() {
               />
               <Stack.Screen
                 name="media-library"
-                options={{ presentation: "modal" }}
+                options={{ presentation: "modal", title: "Media Library" }}
               />
               <Stack.Screen name="chat" options={{ headerShown: false }} />
             </Stack>

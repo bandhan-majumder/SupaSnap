@@ -53,4 +53,4 @@ app-example
 .env.local
 .env.*.local
 
-README.md
+*config*.toml

@@ -96,17 +96,21 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
     Alert.alert(t("camera.sent"));
   };
 
-  const renderConversation = ({ item }: { item: ChatRoom }) => (
-    <ConversationRow
-      item={item}
-      userId={userId || ""}
-      isVideo={isVideo}
-      fileUri={fileUri}
-      theme={theme}
-      sendingId={sendingId}
-      onSend={handleSend}
-    />
-  );
+  const renderConversation = ({ item }: { item: ChatRoom }) => {
+    if (!userId) return null;
+
+    return (
+      <ConversationRow
+        item={item}
+        userId={userId}
+        isVideo={isVideo}
+        fileUri={fileUri}
+        theme={theme}
+        sendingId={sendingId}
+        onSend={handleSend}
+      />
+    );
+  };
 
   const ConversationRow = React.memo(
     ({
@@ -136,9 +140,10 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
     }) => {
       const displayName = getDisplayName(item, userId);
       const avatarUrl = getAvatarUrl(item, userId);
-      const { sendMessage } = useMessages(item.id);
 
-      const handleSend = () => {
+      const { sendMessage } = useMessages(item.id, userId);
+
+      const handleSendPress = () => {
         if (!fileUri) return;
         onSend(fileUri, item.id, sendMessage);
       };
@@ -161,7 +166,9 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
             <View
               style={[styles.avatar, { backgroundColor: theme.supaPrimary }]}
             >
-              <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
+              <Text style={styles.avatarText}>
+                {getInitials(displayName)}
+              </Text>
             </View>
           )}
 
@@ -171,7 +178,7 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
 
           <TouchableOpacity
             style={styles.sendBtn}
-            onPress={handleSend}
+            onPress={handleSendPress}
             disabled={isSending}
           >
             {isSending ? (
@@ -187,17 +194,23 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
 
   return (
     <AppBottomSheet ref={bottomSheetRef} snapPoints={[250, 500]}>
-      <FlatList
-        data={conversations}
-        renderItem={renderConversation}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          <Text style={[styles.header, { color: theme.text }]}>
-            Send your snap to friends
-          </Text>
-        }
-      />
+      {!userId ? (
+        <View style={{ padding: 20 }}>
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <FlatList
+          data={conversations}
+          renderItem={renderConversation}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          ListHeaderComponent={
+            <Text style={[styles.header, { color: theme.text }]}>
+              Send your snap to friends
+            </Text>
+          }
+        />
+      )}
     </AppBottomSheet>
   );
 });

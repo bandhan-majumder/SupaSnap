@@ -39,7 +39,8 @@ export default function ButtonRowTools({
           </ThemedText>
         </TouchableOpacity>
       </View>
-      <IconButton androidName="add" iosName="magnifyingglass" />
+      {/* <IconButton androidName="add" iosName="magnifyingglass" /> */}
+      <View></View>
     </View>
   );
 }
