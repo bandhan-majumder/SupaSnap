@@ -1,46 +1,33 @@
 ### App Icon
 
-<div align="center">
-  <img src="assets/screens/icon.png" width="30%" style="margin: 0 4px;" />
-  <h3>Welcome to SupaSnap!</h3>
-  <p>SupaSnap is a snap sharing application built on top of Expo (React Native) and Supabase. It allows to share snap to friends with native camera with filters available. Both image and video types are available to record and share. It also have i18n support which works based on the device's language.</p>
-</div>
+<div align="center"> <img src="assets/screens/icon.png" width="120" /> <h3>SupaSnap</h3> <p> A snap-sharing app built with Expo (React Native) and Supabase.<br/> Capture photos/videos with filters and share instantly with friends.<br/> Supports i18n based on device language. </p> </div>
+
+### App Demo
+<div align="center"> <img src="assets/supasnap.gif" width="300" />
+
+<br/>
+
+#### note: demo is also available [here](https://www.bandhanmajumder.com/) at the projects preview section
+
+ </div>
 
 ## Screens
 
 ### Auth & Onboarding screen
 
-<div align="center">
-  <img src="assets/screens/landing.png" width="30%" style="margin: 0 4px;" />
-  <img src="assets/screens/auth.png" width="30%" style="margin: 0 4px;" />
-   <img src="assets/screens/username.png" width="30%" style="margin: 0 4px;" />
-  <img src="assets/screens/permission.png" width="30%" style="margin: 0 4px;" />
-</div>
+<div align="center"> <img src="assets/screens/landing.png" width="22%" /> <img src="assets/screens/auth.png" width="22%" /> <img src="assets/screens/username.png" width="22%" /> <img src="assets/screens/permission.png" width="22%" /> </div>
 
-### Tabs
+### Camera & Sharing
 
-<div align="center">
-  <img src="assets/screens/camera.png" width="30%" style="margin: 0 4px;" />
-  <img src="assets/screens/record.png" width="30%" style="margin: 0 4px;" />
-   <img src="assets/screens/preview.png" width="30%" style="margin: 0 4px;" />
-   <img src="assets/screens/share-snap.png" width="30%" style="margin: 0 4px;" />
-</div>
+<div align="center"> <img src="assets/screens/camera.png" width="22%" /> <img src="assets/screens/record.png" width="22%" /> <img src="assets/screens/preview.png" width="22%" /> <img src="assets/screens/share-snap.png" width="22%" /> </div>
 
-### Chat screen
+### Chat
 
-<div align="center">
-  <img src="assets/screens/chat.png" width="30%" style="margin: 0 4px;" />
-  <img src="assets/screens/chat-keyboard.png" width="30%" style="margin: 0 4px;" />
-  <img src="assets/screens/chat-list.png" width="30%" style="margin: 0 4px;" />
-  <img src="assets/screens/chat-search.png" width="30%" style="margin: 0 4px;" />
-</div>
+<div align="center"> <img src="assets/screens/chat.png" width="22%" /> <img src="assets/screens/chat-keyboard.png" width="22%" /> <img src="assets/screens/chat-list.png" width="22%" /> <img src="assets/screens/chat-search.png" width="22%" /> </div>
 
 ### Profile screen
 
-<div align="center">
-  <img src="assets/screens/profile.png" width="30%" style="margin: 0 4px;" />
-  <img src="assets/screens/profile-file-upload.png" width="30%" style="margin: 0 4px;" />
-</div>
+<div align="center"> <img src="assets/screens/profile.png" width="30%" /> <img src="assets/screens/profile-file-upload.png" width="30%" /> </div>
 
 ## Get started
 
@@ -63,7 +50,7 @@
 supabase db reset
 ```
 
-5. Edit the "messages" table to support realtime via the UI
+5. Edit the `messages` table to support realtime via the UI
 
 6. Start the app
 
