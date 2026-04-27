@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,26 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
+import { ColorSchemeName } from "react-native";
+import { Colors } from "@/constants/theme";
+import { Profile } from "@/types/profile";
+
+const DEBOUNCE_MS = 500;
+
+interface UserPickerSheetProps {
+  theme: typeof Colors.light;
+  colorScheme: ColorSchemeName;
+  searchUserName: string;
+  setSearchUserName: (value: string) => void;
+  handleSearch: () => Promise<void>;
+  searching: boolean;
+  searchResult: Profile | null | "not_found";
+  handleStartChat: () => Promise<void>;
+  profiles?: Profile[];
+  handleUserSelect?: (profile: Profile) => void;
+  getInitials: (name: string) => string;
+  currentUserId: string;
+}
 
 export default function UserPickerSheet({
   theme,
@@ -24,46 +44,69 @@ export default function UserPickerSheet({
   handleUserSelect,
   getInitials,
   currentUserId,
-}: any) {
+}: UserPickerSheetProps) {
   const { t } = useTranslation();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    if (!searchUserName.trim()) return;
+
+    debounceTimer.current = setTimeout(() => {
+      handleSearch();
+    }, DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [searchUserName]);
 
   return (
     <View>
-      <TextInput
-        placeholder={t("chat.searchPlaceholder")}
-        placeholderTextColor={theme.icon}
-        value={searchUserName}
-        onChangeText={setSearchUserName}
-        onSubmitEditing={handleSearch}
-        style={[
-          styles.input,
-          { backgroundColor: theme.background, color: theme.text },
-        ]}
-      />
-
-      <TouchableOpacity
-        disabled={searchUserName.length === 0}
-        onPress={handleSearch}
-        style={styles.searchButton}
-      >
-        {searching ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <View
-            style={{
-              display: "flex",
-              gap: 5,
-              flexDirection: "row", 
-              alignItems: "center",
-            }}
-          >
+      <View style={styles.inputRow}>
+        <TextInput
+          placeholder={t("chat.searchPlaceholder")}
+          placeholderTextColor={theme.icon}
+          value={searchUserName}
+          onChangeText={setSearchUserName}
+          onSubmitEditing={handleSearch}
+          style={[
+            styles.input,
+            { backgroundColor: theme.background, color: theme.text, flex: 1 },
+          ]}
+        />
+        <TouchableOpacity
+          disabled={searchUserName.length === 0 || searching}
+          onPress={handleSearch}
+          style={[
+            styles.searchIconButton,
+            {
+              backgroundColor: theme.supaPrimary,
+              opacity: searchUserName.length === 0 ? 0.5 : 1,
+            },
+          ]}
+        >
+          {searching ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
             <Ionicons name="search" size={18} color="white" />
-            <Text style={styles.searchButtonText}>{t("chat.search")}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+          )}
+        </TouchableOpacity>
+      </View>
 
-      {searchResult && (
+      {searchUserName.trim() !== "" && searchResult === "not_found" && !searching && (
+        <View style={styles.notFoundContainer}>
+          <Ionicons name="person-outline" size={32} color={theme.icon} />
+          <Text style={[styles.notFoundText, { color: theme.secondaryText }]}>
+            No results for "{searchUserName}"
+          </Text>
+        </View>
+      )}
+
+      {searchResult !== null && searchResult !== "not_found" && (
         <View
           style={[
             styles.resultContainer,
@@ -80,24 +123,22 @@ export default function UserPickerSheet({
                 style={styles.avatar}
               />
             ) : (
-              <View style={[styles.avatarFallback]}>
+              <View style={styles.avatarFallback}>
                 <Text style={styles.avatarInitials}>
-                  {getInitials(searchResult.username)}
+                  {getInitials(searchResult.username || "")}
                 </Text>
               </View>
             )}
             <View style={styles.resultInfo}>
               <Text style={[styles.resultUsername, { color: theme.text }]}>
-                {searchResult.id === currentUserId
-                  ? "You"
-                  : searchResult.username}
+                {searchResult.id === currentUserId ? "You" : searchResult.username}
               </Text>
               <Text style={[styles.resultHandle, { color: theme.icon }]}>
                 @{searchResult.username}
               </Text>
             </View>
-            {!searchResult.id === currentUserId && (
-              <View style={[styles.chatBadge]}>
+            {searchResult.id !== currentUserId && (
+              <View style={styles.chatBadge}>
                 <Ionicons name="chatbubble" size={18} color="#fff" />
               </View>
             )}
@@ -110,17 +151,14 @@ export default function UserPickerSheet({
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => handleUserSelect(item)}
+            onPress={() => handleUserSelect?.(item)}
             style={[
               styles.profileRow,
               { borderBottomColor: theme.border ?? "#eee" },
             ]}
           >
             {item.avatar_url ? (
-              <Image
-                source={{ uri: item.avatar_url }}
-                style={styles.profileAvatar}
-              />
+              <Image source={{ uri: item.avatar_url }} style={styles.profileAvatar} />
             ) : (
               <View
                 style={[
@@ -129,7 +167,7 @@ export default function UserPickerSheet({
                 ]}
               >
                 <Text style={styles.avatarInitials}>
-                  {getInitials(item.username)}
+                  {getInitials(item.username || "")}
                 </Text>
               </View>
             )}
@@ -145,23 +183,32 @@ export default function UserPickerSheet({
 }
 
 const styles = StyleSheet.create({
-  input: {
-    marginTop: 12,
-    padding: 14,
-    borderRadius: 12,
-    fontSize: 15,
-  },
-  searchButton: {
-    marginTop: 10,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: "#D8B38A",
+  inputRow: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 8,
+    marginTop: 12,
   },
-  searchButtonText: {
-    fontWeight: "600",
+  input: {
+    padding: 14,
+    borderRadius: 12,
     fontSize: 15,
-    color: "#fff",
+  },
+  searchIconButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notFoundContainer: {
+    marginTop: 24,
+    alignItems: "center",
+    gap: 8,
+  },
+  notFoundText: {
+    fontSize: 14,
+    textAlign: "center",
   },
   resultContainer: {
     marginTop: 16,

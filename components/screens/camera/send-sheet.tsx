@@ -166,9 +166,7 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
             <View
               style={[styles.avatar, { backgroundColor: theme.supaPrimary }]}
             >
-              <Text style={styles.avatarText}>
-                {getInitials(displayName)}
-              </Text>
+              <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
             </View>
           )}
 
@@ -206,8 +204,31 @@ const SendSheet = React.forwardRef<SendSheetRef>((_, ref) => {
           contentContainerStyle={styles.list}
           ListHeaderComponent={
             <Text style={[styles.header, { color: theme.text }]}>
-              Send your snap to friends
+              {conversations.length > 0 ? "Send your snap to friends" : ""}
             </Text>
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View
+                style={[styles.emptyIcon, { backgroundColor: theme.surface }]}
+              >
+                <Ionicons
+                  name="chatbubble-ellipses-outline"
+                  size={32}
+                  color={theme.text}
+                />
+              </View>
+
+              <Text style={[styles.emptyTitle, { color: theme.text }]}>
+                No friends yet
+              </Text>
+
+              <Text
+                style={[styles.emptySubtitle, { color: theme.text }]}
+              >
+               Add friends and send snaps directly from here
+              </Text>
+            </View>
           }
         />
       )}
@@ -259,5 +280,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#D8B38A",
     padding: 10,
     borderRadius: 20,
+  },
+
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 40,
+    paddingHorizontal: 20,
+  },
+
+  emptyIcon: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    opacity: 0.9,
+  },
+
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 6,
+  },
+
+  emptySubtitle: {
+    fontSize: 13,
+    textAlign: "center",
+    opacity: 0.7,
   },
 });

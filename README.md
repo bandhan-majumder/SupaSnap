@@ -57,7 +57,15 @@
 
 3. Setup supabase locally and setup the credentials (reference: see [docs](https://supabase.com/docs/guides/local-development/cli/getting-started))
 
-4. Start the app
+4. Reset the db
+
+```bash
+supabase db reset
+```
+
+5. Edit the "messages" table to support realtime via the UI
+
+6. Start the app
 
    ```bash
    npx expo start

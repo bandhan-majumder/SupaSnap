@@ -15,8 +15,8 @@ import {
 import { Profile } from "@/types/profile";
 import { ChatRoom } from "@/types/room";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import React, { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -29,7 +29,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { useFocusEffect } from "expo-router";
 
 export default function ChatListScreen() {
   const { t } = useTranslation();
@@ -56,7 +55,7 @@ export default function ChatListScreen() {
   const { loading: profilesLoading, searchByUsername } = useProfiles();
 
   const [searchUserName, setSearchUserName] = useState("");
-  const [searchResult, setSearchResult] = useState<Profile | null>(null);
+  const [searchResult, setSearchResult] = useState<Profile | null | "not_found">(null);
   const [searching, setSearching] = useState(false);
 
   const bottomSheetRef = useRef<BottomSheetMethods>(null);
@@ -65,12 +64,16 @@ export default function ChatListScreen() {
     if (!searchUserName.trim()) return;
     setSearching(true);
     const result = await searchByUsername(searchUserName.trim());
-    setSearchResult(result);
+    setSearchResult(result ?? "not_found");
     setSearching(false);
   };
 
   const handleStartChat = async () => {
-    if (!searchResult || searchResult.id === currentUserId) {
+    if (
+      !searchResult ||
+      searchResult === "not_found" ||
+      searchResult.id === currentUserId
+    ) {
       Alert.alert(t("common.error"), t("chats.cannotStartChatWithYourself"));
       return;
     }
@@ -93,13 +96,7 @@ export default function ChatListScreen() {
 
     return (
       <TouchableOpacity
-        style={[
-          styles.conversationItem,
-          {
-            // backgroundColor: theme.surface,
-            // borderColor: theme.border,
-          },
-        ]}
+        style={styles.conversationItem}
         activeOpacity={0.7}
         onPress={() => router.push(`/chat/${item.id}`)}
       >

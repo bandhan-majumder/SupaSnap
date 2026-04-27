@@ -95,29 +95,13 @@ const VideoMessage = React.memo(
 );
 
 const MessageItem = React.memo(
-  ({
-    item,
-    isOwn,
-    showDate,
-    formatDate,
-    formatTime,
-    theme,
-    colorScheme,
-    onMediaPress,
-  }: any) => {
+  ({ item, isOwn, formatTime, theme, colorScheme, onMediaPress }: any) => {
     const isMedia = item.type === "media";
     const isImage = isMedia && item.media_type === "image";
     const isVideo = isMedia && item.media_type === "video";
 
     return (
       <>
-        {showDate && (
-          <View style={styles.dateContainer}>
-            <Text style={[styles.dateText, { color: theme.icon }]}>
-              {formatDate(item.created_at)}
-            </Text>
-          </View>
-        )}
         <View
           style={[styles.messageContainer, isOwn && styles.ownMessageContainer]}
         >
@@ -202,7 +186,8 @@ export default function ChatRoomScreen() {
 
   const currentUserId = user?.id;
   const { messages, loading, sendMessage, isOtherUserOnline } = useMessages(
-    id || null, user?.id || null
+    id || null,
+    user?.id || null,
   );
 
   const [messageText, setMessageText] = useState("");
@@ -254,20 +239,20 @@ export default function ChatRoomScreen() {
       minute: "2-digit",
     });
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
+  // const formatDate = (dateStr: string) => {
+  //   const date = new Date(dateStr);
+  //   const now = new Date();
+  //   const yesterday = new Date();
+  //   yesterday.setDate(now.getDate() - 1);
 
-    if (date.toDateString() === now.toDateString()) return "Today";
-    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
-    return date.toLocaleDateString([], {
-      weekday: "long",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  //   if (date.toDateString() === now.toDateString()) return "Today";
+  //   if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+  //   return date.toLocaleDateString([], {
+  //     weekday: "long",
+  //     month: "short",
+  //     day: "numeric",
+  //   });
+  // };
 
   const shouldShowDate = (index: number) => {
     if (index === 0) return true;
@@ -284,7 +269,6 @@ export default function ChatRoomScreen() {
         item={item}
         isOwn={item.sender_id === currentUserId}
         showDate={shouldShowDate(index)}
-        formatDate={formatDate}
         formatTime={formatTime}
         theme={theme}
         colorScheme={colorScheme}
@@ -340,7 +324,10 @@ export default function ChatRoomScreen() {
               {otherUser?.username ?? ""}
             </Text>
             <Text
-              style={[styles.status, { color: isOtherUserOnline ? 'green' : 'gray' }]}
+              style={[
+                styles.status,
+                { color: isOtherUserOnline ? "green" : "gray" },
+              ]}
               numberOfLines={1}
             >
               {isOtherUserOnline ? "(online)" : "(offline)"}
@@ -360,7 +347,10 @@ export default function ChatRoomScreen() {
             showsVerticalScrollIndicator={false}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.messagesList}
+            contentContainerStyle={[
+              styles.messagesList,
+              messages.length === 0 && { flex: 1, justifyContent: "center" },
+            ]}
             initialNumToRender={10}
             maxToRenderPerBatch={10}
             windowSize={5}
